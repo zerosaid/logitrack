@@ -16,7 +16,7 @@ public class Auditoria {
     private String operacion; // INSERT, UPDATE, DELETE
     private String usuario;
 
-    @Column(name = "fecha_hora")
+    @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora = LocalDateTime.now();
 
     @Lob
@@ -25,10 +25,19 @@ public class Auditoria {
     @Lob
     private String valoresDespues;
 
-    // Getters y Setters
+    // ===== Getters y Setters =====
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getEntidad() {
         return entidad;
     }
+
     public void setEntidad(String entidad) {
         this.entidad = entidad;
     }
@@ -36,6 +45,7 @@ public class Auditoria {
     public Long getEntidadId() {
         return entidadId;
     }
+
     public void setEntidadId(Long entidadId) {
         this.entidadId = entidadId;
     }
@@ -43,6 +53,7 @@ public class Auditoria {
     public String getOperacion() {
         return operacion;
     }
+
     public void setOperacion(String operacion) {
         this.operacion = operacion;
     }
@@ -50,13 +61,23 @@ public class Auditoria {
     public String getUsuario() {
         return usuario;
     }
+
     public void setUsuario(String usuario) {
         this.usuario = usuario;
+    }
+
+    public LocalDateTime getFechaHora() {
+        return fechaHora;
+    }
+
+    public void setFechaHora(LocalDateTime fechaHora) {
+        this.fechaHora = fechaHora;
     }
 
     public String getValoresAntes() {
         return valoresAntes;
     }
+
     public void setValoresAntes(String valoresAntes) {
         this.valoresAntes = valoresAntes;
     }
@@ -64,6 +85,7 @@ public class Auditoria {
     public String getValoresDespues() {
         return valoresDespues;
     }
+
     public void setValoresDespues(String valoresDespues) {
         this.valoresDespues = valoresDespues;
     }
