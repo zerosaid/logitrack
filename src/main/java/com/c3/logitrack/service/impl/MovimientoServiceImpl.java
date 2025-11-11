@@ -2,7 +2,6 @@ package com.c3.logitrack.service.impl;
 
 import com.c3.logitrack.exeption.ResourceNotFoundException;
 import com.c3.logitrack.model.*;
-import com.c3.logitrack.model.enums.TipoMovimiento;
 import com.c3.logitrack.repository.*;
 import com.c3.logitrack.service.AuditoriaService;
 import com.c3.logitrack.service.MovimientoService;
@@ -64,7 +63,7 @@ public class MovimientoServiceImpl implements MovimientoService {
             throw new IllegalArgumentException("El tipo de movimiento es obligatorio.");
         }
 
-        // Cargar bodegas
+        // Cargar bodegas si existen
         if (movimiento.getBodegaOrigen() != null && movimiento.getBodegaOrigen().getId() != null) {
             Bodega origen = bodegaRepository.findById(movimiento.getBodegaOrigen().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Bodega origen no encontrada"));
@@ -77,10 +76,15 @@ public class MovimientoServiceImpl implements MovimientoService {
             movimiento.setBodegaDestino(destino);
         }
 
+        // Asignar fecha actual
         movimiento.setFecha(LocalDateTime.now());
         Movimiento saved = movimientoRepository.save(movimiento);
 
-        // Procesar los ítems
+        // Validar y procesar ítems
+        if (movimiento.getItems() == null || movimiento.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Debe registrar al menos un producto en el movimiento.");
+        }
+
         for (MovimientoItem item : movimiento.getItems()) {
             item.setMovimiento(saved);
 
@@ -115,8 +119,10 @@ public class MovimientoServiceImpl implements MovimientoService {
 
             movimientoItemRepository.save(item);
 
-            // Auditoría básica (sin enum Operacion)
-            String usuario = movimiento.getUsuario() != null ? movimiento.getUsuario().getUsername() : "SYSTEM";
+            // Auditoría básica
+            String usuario = (movimiento.getUsuario() != null)
+                    ? movimiento.getUsuario().getUsername()
+                    : "SYSTEM";
             auditoriaService.crearAuditoria(
                     "MovimientoItem",
                     item.getId(),
@@ -126,8 +132,10 @@ public class MovimientoServiceImpl implements MovimientoService {
             );
         }
 
-        // Auditoría general del movimiento
-        String usuarioMov = movimiento.getUsuario() != null ? movimiento.getUsuario().getUsername() : "SYSTEM";
+        // Auditoría del movimiento completo
+        String usuarioMov = (movimiento.getUsuario() != null)
+                ? movimiento.getUsuario().getUsername()
+                : "SYSTEM";
         auditoriaService.crearAuditoria(
                 "Movimiento",
                 saved.getId(),
@@ -146,15 +154,15 @@ public class MovimientoServiceImpl implements MovimientoService {
         return saved;
     }
 
-    // Ajustar stock en una bodega (sumar o restar)
+    // === Ajustar stock en una bodega (sumar o restar) ===
     private void ajustarStock(Bodega bodega, Producto producto, Integer cantidad, boolean sumar) {
-        List<Stock> stocks = stockRepository.findByBodegaId(bodega.getId());
-        Optional<Stock> opt = stocks.stream()
-                .filter(s -> s.getProducto().getId().equals(producto.getId()))
-                .findFirst();
+        // Buscar stock existente
+        Optional<Stock> opt = stockRepository.findByBodegaAndProducto(bodega, producto);
 
         Stock stock = opt.orElseGet(() -> {
-            if (!sumar) throw new IllegalStateException("No hay stock del producto en la bodega origen.");
+            if (!sumar) {
+                throw new IllegalStateException("No hay stock del producto en la bodega origen.");
+            }
             Stock nuevo = new Stock();
             nuevo.setBodega(bodega);
             nuevo.setProducto(producto);
@@ -165,11 +173,16 @@ public class MovimientoServiceImpl implements MovimientoService {
         int antes = Optional.ofNullable(stock.getCantidad()).orElse(0);
         int despues = sumar ? antes + cantidad : antes - cantidad;
 
-        if (despues < 0)
+        if (despues < 0) {
             throw new IllegalStateException("Stock insuficiente en bodega " + bodega.getNombre() +
                     " para el producto " + producto.getNombre());
+        }
 
-        // Auditoría del cambio
+        stock.setCantidad(despues);
+        stock.setFechaActualizacion(LocalDateTime.now());
+        stockRepository.save(stock);
+
+        // Auditoría del cambio de stock
         String usuario = Optional.ofNullable(movimientoUsuarioName()).orElse("SYSTEM");
         auditoriaService.crearAuditoria(
                 "Stock",
@@ -178,13 +191,9 @@ public class MovimientoServiceImpl implements MovimientoService {
                 "Actualización de stock",
                 String.format("{\"antes\":%d,\"despues\":%d}", antes, despues)
         );
-
-        stock.setCantidad(despues);
-        stock.setFechaActualizacion(LocalDateTime.now());
-        stockRepository.save(stock);
     }
 
-    // Recalcular stock total en Producto
+    // === Recalcular stock total del producto ===
     private void recomputeProductoStock(Long productoId) {
         List<Stock> byProducto = stockRepository.findByProductoId(productoId);
         int total = byProducto.stream()
@@ -193,11 +202,11 @@ public class MovimientoServiceImpl implements MovimientoService {
 
         Producto p = productoRepository.findById(productoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado id=" + productoId));
-        p.setStock(total);
+
         productoRepository.save(p);
     }
 
-    // Placeholder para obtener el usuario actual (si se integra seguridad más adelante)
+    // === Placeholder: usuario actual (seguridad futura) ===
     private String movimientoUsuarioName() {
         return null;
     }
