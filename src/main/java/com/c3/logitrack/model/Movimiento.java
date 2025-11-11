@@ -12,8 +12,6 @@ public class Movimiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDateTime fecha = LocalDateTime.now();
-
     @Enumerated(EnumType.STRING)
     private TipoMovimiento tipo; 
 
