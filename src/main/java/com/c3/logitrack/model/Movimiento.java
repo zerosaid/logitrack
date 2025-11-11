@@ -3,6 +3,7 @@ package com.c3.logitrack.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.c3.logitrack.model.enums.TipoMovimiento;
 
 @Entity
 @Table(name = "movimiento")
@@ -47,5 +48,4 @@ public class Movimiento {
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
     }
-
 }
