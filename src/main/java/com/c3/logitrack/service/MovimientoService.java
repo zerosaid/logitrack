@@ -14,4 +14,6 @@ public interface MovimientoService {
     List<Movimiento> buscarPorRango(LocalDateTime desde, LocalDateTime hasta);
 
     Movimiento registrarMovimiento(Movimiento movimiento);
+
+    List<Movimiento> buscarPorTipo(String upperCase);
 }

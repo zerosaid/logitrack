@@ -2,7 +2,6 @@ package com.c3.logitrack.service.impl;
 
 import com.c3.logitrack.exeption.ResourceNotFoundException;
 import com.c3.logitrack.model.*;
-import com.c3.logitrack.model.enums.TipoMovimiento;
 import com.c3.logitrack.repository.*;
 import com.c3.logitrack.service.AuditoriaService;
 import com.c3.logitrack.service.MovimientoService;
@@ -199,5 +198,10 @@ public class MovimientoServiceImpl implements MovimientoService {
 
     private String movimientoUsuarioName() {
         return null;
+    }
+
+    @Override
+    public List<Movimiento> buscarPorTipo(String tipo) {
+        return movimientoRepository.findByTipoIgnoreCase(tipo);
     }
 }
