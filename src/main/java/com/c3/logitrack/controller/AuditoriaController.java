@@ -22,7 +22,7 @@ public class AuditoriaController {
     // === LISTAR TODAS LAS AUDITORÍAS ===
     @GetMapping
     public ResponseEntity<List<Auditoria>> listarTodas() {
-        List<Auditoria> auditorias = auditoriaService.listarTodas();
+        List<Auditoria> auditorias = auditoriaService.listarTodos();
         return ResponseEntity.ok(auditorias);
     }
 
@@ -37,7 +37,7 @@ public class AuditoriaController {
     // === BUSCAR POR USUARIO ===
     @GetMapping("/usuario/{username}")
     public ResponseEntity<List<Auditoria>> buscarPorUsuario(@PathVariable String username) {
-        List<Auditoria> auditorias = auditoriaService.buscarPorUsuario(username);
+        List<Auditoria> auditorias = auditoriaService.listarPorUsuario(username);
         return ResponseEntity.ok(auditorias);
     }
 
