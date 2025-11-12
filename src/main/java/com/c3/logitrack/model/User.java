@@ -71,5 +71,13 @@ public class User {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
+    public void setFechaRegistro(LocalDateTime now) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setFechaRegistro'");
+    }
+    public Long getId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+    }
 }
 
