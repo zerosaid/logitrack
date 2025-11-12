@@ -29,7 +29,15 @@ public class User {
     @OneToMany(mappedBy = "usuario")
     private List<Movimiento> movimientos;
 
-    // Getters y Setters
+    public User() {}
+
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -71,13 +79,11 @@ public class User {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
-    public void setFechaRegistro(LocalDateTime now) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setFechaRegistro'");
+
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
     }
-    public Long getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
     }
 }
-
