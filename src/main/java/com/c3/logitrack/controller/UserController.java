@@ -3,6 +3,8 @@ package com.c3.logitrack.controller;
 import com.c3.logitrack.model.User;
 import com.c3.logitrack.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<User>> listarTodos() {
         List<User> usuarios = userService.listarTodos();
-        usuarios.forEach(u -> u.setPassword(null)); // Ocultamos contraseÃ±a
+        usuarios.forEach(u -> u.setPassword(null)); // ocultamos contraseña
         return ResponseEntity.ok(usuarios);
     }
 
@@ -43,6 +45,21 @@ public class UserController {
         return userService.buscarPorUsername(username)
                 .map(u -> {
                     u.setPassword(null);
+                    return ResponseEntity.ok(u);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // === OBTENER USUARIO LOGEADO (desde JWT) ===
+    @GetMapping("/me")
+    public ResponseEntity<User> obtenerUsuarioActual(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        return userService.buscarPorUsername(userDetails.getUsername())
+                .map(u -> {
+                    u.setPassword(null); // ocultar contraseña
                     return ResponseEntity.ok(u);
                 })
                 .orElse(ResponseEntity.notFound().build());
