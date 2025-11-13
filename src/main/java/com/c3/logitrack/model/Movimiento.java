@@ -33,74 +33,33 @@ public class Movimiento {
     private String observaciones;
 
     @Column(nullable = false)
-    private LocalDateTime fecha = LocalDateTime.now(); // 👈 usada en el servicio
+    private LocalDateTime fecha = LocalDateTime.now();
 
     @OneToMany(mappedBy = "movimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovimientoItem> items;
 
-    // ======== Getters y Setters ========
+    // ===== Getters y Setters =====
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public TipoMovimiento getTipo() { return tipo; }
+    public void setTipo(TipoMovimiento tipo) { this.tipo = tipo; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public User getUsuario() { return usuario; }
+    public void setUsuario(User usuario) { this.usuario = usuario; }
 
-    public TipoMovimiento getTipo() {
-        return tipo;
-    }
+    public Bodega getBodegaOrigen() { return bodegaOrigen; }
+    public void setBodegaOrigen(Bodega bodegaOrigen) { this.bodegaOrigen = bodegaOrigen; }
 
-    public void setTipo(TipoMovimiento tipo) {
-        this.tipo = tipo;
-    }
+    public Bodega getBodegaDestino() { return bodegaDestino; }
+    public void setBodegaDestino(Bodega bodegaDestino) { this.bodegaDestino = bodegaDestino; }
 
-    public User getUsuario() {
-        return usuario;
-    }
+    public String getObservaciones() { return observaciones; }
+    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
-    public void setUsuario(User usuario) {
-        this.usuario = usuario;
-    }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
-    public Bodega getBodegaOrigen() {
-        return bodegaOrigen;
-    }
-
-    public void setBodegaOrigen(Bodega bodegaOrigen) {
-        this.bodegaOrigen = bodegaOrigen;
-    }
-
-    public Bodega getBodegaDestino() {
-        return bodegaDestino;
-    }
-
-    public void setBodegaDestino(Bodega bodegaDestino) {
-        this.bodegaDestino = bodegaDestino;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
-
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
-
-    public List<MovimientoItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<MovimientoItem> items) {
-        this.items = items;
-    }
+    public List<MovimientoItem> getItems() { return items; }
+    public void setItems(List<MovimientoItem> items) { this.items = items; }
 }

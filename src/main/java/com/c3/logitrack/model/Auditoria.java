@@ -26,67 +26,27 @@ public class Auditoria {
     private String valoresDespues;
 
     // ===== Getters y Setters =====
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getEntidad() { return entidad; }
+    public void setEntidad(String entidad) { this.entidad = entidad; }
 
-    public String getEntidad() {
-        return entidad;
-    }
+    public Long getEntidadId() { return entidadId; }
+    public void setEntidadId(Long entidadId) { this.entidadId = entidadId; }
 
-    public void setEntidad(String entidad) {
-        this.entidad = entidad;
-    }
+    public String getOperacion() { return operacion; }
+    public void setOperacion(String operacion) { this.operacion = operacion; }
 
-    public Long getEntidadId() {
-        return entidadId;
-    }
+    public String getUsuario() { return usuario; }
+    public void setUsuario(String usuario) { this.usuario = usuario; }
 
-    public void setEntidadId(Long entidadId) {
-        this.entidadId = entidadId;
-    }
+    public LocalDateTime getFechaHora() { return fechaHora; }
+    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
 
-    public String getOperacion() {
-        return operacion;
-    }
+    public String getValoresAntes() { return valoresAntes; }
+    public void setValoresAntes(String valoresAntes) { this.valoresAntes = valoresAntes; }
 
-    public void setOperacion(String operacion) {
-        this.operacion = operacion;
-    }
-
-    public String getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
-
-    public LocalDateTime getFechaHora() {
-        return fechaHora;
-    }
-
-    public void setFechaHora(LocalDateTime fechaHora) {
-        this.fechaHora = fechaHora;
-    }
-
-    public String getValoresAntes() {
-        return valoresAntes;
-    }
-
-    public void setValoresAntes(String valoresAntes) {
-        this.valoresAntes = valoresAntes;
-    }
-
-    public String getValoresDespues() {
-        return valoresDespues;
-    }
-
-    public void setValoresDespues(String valoresDespues) {
-        this.valoresDespues = valoresDespues;
-    }
+    public String getValoresDespues() { return valoresDespues; }
+    public void setValoresDespues(String valoresDespues) { this.valoresDespues = valoresDespues; }
 }

@@ -26,89 +26,42 @@ public class Stock {
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion = LocalDateTime.now();
 
-    // ===== Constructores =====
     public Stock() {}
 
     public Stock(Bodega bodega, Producto producto, Integer cantidad) {
         this.bodega = bodega;
         this.producto = producto;
-        setCantidad(cantidad);
+        this.cantidad = cantidad;
         this.fechaActualizacion = LocalDateTime.now();
     }
 
     // ===== Getters y Setters =====
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Bodega getBodega() { return bodega; }
+    public void setBodega(Bodega bodega) { this.bodega = bodega; }
 
-    public Bodega getBodega() {
-        return bodega;
-    }
+    public Producto getProducto() { return producto; }
+    public void setProducto(Producto producto) { this.producto = producto; }
 
-    public void setBodega(Bodega bodega) {
-        this.bodega = bodega;
-    }
+    public Integer getCantidad() { return cantidad; }
+    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
 
-    public Producto getProducto() {
-        return producto;
-    }
+    public LocalDateTime getFechaActualizacion() { return fechaActualizacion; }
+    public void setFechaActualizacion(LocalDateTime fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
 
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public Integer getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(Integer cantidad) {
-        if (cantidad < 0) {
-            throw new IllegalArgumentException("La cantidad no puede ser negativa");
-        }
-        this.cantidad = cantidad;
-    }
-
-    public LocalDateTime getFechaActualizacion() {
-        return fechaActualizacion;
-    }
-
-    public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
-        this.fechaActualizacion = fechaActualizacion;
-    }
-
-    // ===== Eventos automáticos =====
     @PreUpdate
-    public void preUpdate() {
-        this.fechaActualizacion = LocalDateTime.now();
-    }
+    public void preUpdate() { this.fechaActualizacion = LocalDateTime.now(); }
 
-    // ===== Métodos utilitarios =====
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Stock)) return false;
         Stock stock = (Stock) o;
-        return Objects.equals(bodega, stock.bodega) &&
-               Objects.equals(producto, stock.producto);
+        return Objects.equals(bodega, stock.bodega) && Objects.equals(producto, stock.producto);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(bodega, producto);
-    }
-
-    @Override
-    public String toString() {
-        return "Stock{" +
-                "id=" + id +
-                ", bodega=" + (bodega != null ? bodega.getNombre() : "null") +
-                ", producto=" + (producto != null ? producto.getNombre() : "null") +
-                ", cantidad=" + cantidad +
-                ", fechaActualizacion=" + fechaActualizacion +
-                '}';
-    }
+    public int hashCode() { return Objects.hash(bodega, producto); }
 }
