@@ -7,11 +7,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class UserController {
 
     private final UserService userService;
@@ -52,15 +54,20 @@ public class UserController {
 
     // === OBTENER USUARIO LOGEADO (desde JWT) ===
     @GetMapping("/me")
-    public ResponseEntity<User> obtenerUsuarioActual(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Map<String, Object>> obtenerUsuarioActual(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(401).build();
         }
 
         return userService.buscarPorUsername(userDetails.getUsername())
                 .map(u -> {
-                    u.setPassword(null); // ocultar contraseña
-                    return ResponseEntity.ok(u);
+                    u.setPassword(null);
+                    Map<String, Object> respuesta = new HashMap<>();
+                    respuesta.put("id", u.getId());
+                    respuesta.put("username", u.getUsername());
+                    respuesta.put("role", u.getRole().name());
+                    respuesta.put("descripcionRol", u.getRoleDescripcion()); 
+                    return ResponseEntity.ok(respuesta);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
