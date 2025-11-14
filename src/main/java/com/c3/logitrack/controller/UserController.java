@@ -1,9 +1,15 @@
 package com.c3.logitrack.controller;
 
 import com.c3.logitrack.model.User;
+import com.c3.logitrack.security.JwtTokenProvider;
 import com.c3.logitrack.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +23,15 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public UserController(UserService userService) {
+    @Autowired
+    public UserController(UserService userService, AuthenticationManager authenticationManager,
+            JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     // === LISTAR TODOS LOS USUARIOS ===
@@ -58,7 +70,6 @@ public class UserController {
         if (userDetails == null) {
             return ResponseEntity.status(401).build();
         }
-
         return userService.buscarPorUsername(userDetails.getUsername())
                 .map(u -> {
                     u.setPassword(null);
@@ -66,10 +77,37 @@ public class UserController {
                     respuesta.put("id", u.getId());
                     respuesta.put("username", u.getUsername());
                     respuesta.put("role", u.getRole().name());
-                    respuesta.put("descripcionRol", u.getRoleDescripcion()); 
+                    respuesta.put("descripcionRol", u.getRoleDescripcion());
                     return ResponseEntity.ok(respuesta);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // === LOGIN DE USUARIO (nuevo endpoint) ===
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = userService.buscarPorUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            String token = jwtTokenProvider.generateToken(authentication); // Usa JwtTokenProvider
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("username", user.getUsername());
+            response.put("role", user.getRole().name());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401)
+                    .body("Credenciales incorrectas o error de autenticación: " + e.getMessage());
+        }
     }
 
     // === CREAR NUEVO USUARIO (solo ADMIN) ===
@@ -113,4 +151,22 @@ public class UserController {
             return ResponseEntity.internalServerError().body("Error al desactivar el usuario: " + e.getMessage());
         }
     }
+
+    // Método auxiliar para generar token (debe estar en JwtTokenProvider)
+    private String generateToken(UserDetails userDetails) {
+        // Implementación depende de JwtTokenProvider
+        // Ejemplo: return jwtTokenProvider.generateToken(userDetails);
+        return "token-placeholder"; // Reemplaza con la lógica real
+    }
+}
+
+// Clase de solicitud de login
+class LoginRequest {
+    private String username;
+    private String password;
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }
