@@ -1,5 +1,6 @@
 package com.c3.logitrack.security;
 
+import com.c3.logitrack.model.User;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +18,29 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${jwt.secret}") // Debe definirse en application.properties
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration}") // En milisegundos, ejemplo: 86400000 = 1 día
+    @Value("${jwt.expiration}")
     private int jwtExpirationMs;
 
-    // === GENERAR TOKEN ===
+    // === GENERAR TOKEN DESDE USER (para login) ===
+    public String generateToken(User user) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        Key key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS512.getJcaName());
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole().name())  // ← Añadimos el rol
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    // === GENERAR TOKEN DESDE AUTHENTICATION (para JwtAuthFilter) ===
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
@@ -64,29 +81,13 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
 
-            // Verificar si el token no ha expirado
             if (claims.getBody().getExpiration().before(new Date())) {
-                logger.warn("Token expirado para username: {}", claims.getBody().getSubject());
+                logger.warn("Token expirado");
                 return false;
             }
             return true;
-        } catch (ExpiredJwtException e) {
-            logger.warn("Token expirado: {}", e.getMessage());
-            return false;
-        } catch (UnsupportedJwtException e) {
-            logger.error("Token no soportado: {}", e.getMessage());
-            return false;
-        } catch (MalformedJwtException e) {
-            logger.error("Token mal formado: {}", e.getMessage());
-            return false;
-        } catch (SignatureException e) {
-            logger.error("Firma inválida del token: {}", e.getMessage());
-            return false;
-        } catch (IllegalArgumentException e) {
-            logger.error("Token vacío o nulo: {}", e.getMessage());
-            return false;
         } catch (Exception e) {
-            logger.error("Error inesperado al validar token: {}", e.getMessage());
+            logger.error("Error al validar token: {}", e.getMessage());
             return false;
         }
     }
