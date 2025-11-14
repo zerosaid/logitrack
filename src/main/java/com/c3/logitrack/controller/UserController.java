@@ -1,9 +1,9 @@
 package com.c3.logitrack.controller;
 
+import com.c3.logitrack.dto.LoginRequest;
 import com.c3.logitrack.model.User;
 import com.c3.logitrack.security.JwtTokenProvider;
 import com.c3.logitrack.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +26,6 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
     public UserController(UserService userService, AuthenticationManager authenticationManager,
             JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
@@ -93,11 +92,11 @@ public class UserController {
                             loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User user = userService.buscarPorUsername(userDetails.getUsername())
+            User user = userService.buscarPorUsername(loginRequest.getUsername())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-            String token = jwtTokenProvider.generateToken(authentication); // Usa JwtTokenProvider
+            String token = jwtTokenProvider.generateToken(authentication);
+
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("username", user.getUsername());
@@ -151,22 +150,4 @@ public class UserController {
             return ResponseEntity.internalServerError().body("Error al desactivar el usuario: " + e.getMessage());
         }
     }
-
-    // Método auxiliar para generar token (debe estar en JwtTokenProvider)
-    private String generateToken(UserDetails userDetails) {
-        // Implementación depende de JwtTokenProvider
-        // Ejemplo: return jwtTokenProvider.generateToken(userDetails);
-        return "token-placeholder"; // Reemplaza con la lógica real
-    }
-}
-
-// Clase de solicitud de login
-class LoginRequest {
-    private String username;
-    private String password;
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
 }
