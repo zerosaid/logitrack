@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiTrack | Gestión de Usuarios</title>
+    <link rel="stylesheet" href="./usuarios.css">
+</head>
+
+<body>
+    <header class="header">
+        <h1>👥 Gestión de Usuarios</h1>
+        <button id="backBtn" class="back-btn">⬅ Volver al Dashboard</button>
+    </header>
+
+    <main class="container">
+        <!-- FORMULARIO -->
+        <section class="form-section">
+            <h2>Registrar nuevo usuario</h2>
+            <form id="usuarioForm">
+                <label for="nombre">Nombre completo</label>
+                <input type="text" id="nombre" required placeholder="Ej: Juan Pérez" />
+
+                <label for="correo">Correo electrónico</label>
+                <input type="email" id="correo" required placeholder="Ej: juan@logitrack.com" />
+
+                <label for="rol">Rol</label>
+                <select id="rol" required>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="EMPLEADO">Empleado</option>
+                </select>
+
+                <label for="contrasena">Contraseña</label>
+                <input type="password" id="contrasena" required placeholder="••••••••" />
+
+                <button type="submit">💾 Guardar Usuario</button>
+            </form>
+        </section>
+
+        <!-- TABLA -->
+        <section class="tabla-section">
+            <h2>Usuarios Registrados</h2>
+            <table id="tablaUsuarios">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="./usuarios.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiTrack | Panel del Empleado</title>
+    <link rel="stylesheet" href="user-dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barra lateral -->
+        <aside class="sidebar">
+            <h2>LogiTrack</h2>
+            <ul>
+                <li class="active" data-section="inicio">🏠 Inicio</li>
+                <li data-section="movimientos">📦 Movimientos</li>
+                <li data-section="reportes">📊 Reportes</li>
+                <li data-section="productos">🛒 Producto</li>
+                <li data-section="perfil">👤 Mi perfil</li>
+            </ul>
+            <button id="logoutBtn" class="logout-btn">🔙 Volver al Login</button>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <header>
+                <h1 id="welcomeMsg">Bienvenido, Empleado</h1>
+                <p class="subtitle">Panel de control personal</p>
+            </header>
+
+            <section id="content">
+                <div class="card">
+                    <h3>Movimientos recientes</h3>
+                    <p>Última actualización: hoy</p>
+                </div>
+
+                <div class="card">
+                    <h3>Reportes generados</h3>
+                    <p>3 informes disponibles</p>
+                </div>
+
+                <div class="card">
+                    <h3>Auditorías asignadas</h3>
+                    <p>Ninguna pendiente</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="user-dashboard.js"></script>
+</body>
+</html>

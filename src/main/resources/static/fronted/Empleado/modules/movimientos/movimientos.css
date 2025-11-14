@@ -1,0 +1,222 @@
+/* ===== Estilos base ===== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2b2b3d);
+    color: #e6e6f0;
+    min-height: 100vh;
+}
+
+/* ===== Header ===== */
+.header {
+    background: #4c1d95; /* morado oscuro */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.header h1 {
+    font-size: 1.6rem;
+}
+
+.back-btn {
+    background: #9333ea;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.back-btn:hover {
+    background: #7e22ce;
+}
+
+/* ===== Contenedor principal ===== */
+.container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+/* ===== Sección de filtros ===== */
+.filtros {
+    background: #2e2e3e;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.filtros h2 {
+    color: #c084fc;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #ddd;
+}
+
+input, select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #3b3b4f;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+/* ===== Botón filtrar ===== */
+.btn-filtrar {
+    width: 100%;
+    background: #9333ea;
+    color: #fff;
+    border: none;
+    padding: 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-filtrar:hover {
+    background: #7e22ce;
+}
+
+/* ===== Tabla ===== */
+.tabla {
+    background: #2e2e3e;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.tabla h2 {
+    color: #c084fc;
+    margin-bottom: 1rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+th, td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #3e3e4f;
+}
+
+th {
+    background: #4c1d95;
+    color: #fff;
+}
+
+td {
+    background: #3b3b4f;
+    color: #ddd;
+}
+
+tr:hover td {
+    background: #4b4b63;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.8rem;
+    }
+
+    .header h1 {
+        font-size: 1.4rem;
+    }
+
+    .back-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .filtros, .tabla {
+        padding: 1rem;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 0.6rem;
+    }
+
+    /* Convertir la tabla en formato scrollable */
+    .tabla {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 600px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 1rem;
+    }
+
+    .header h1 {
+        font-size: 1.2rem;
+    }
+
+    .back-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .filtros h2, .tabla h2 {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+
+    label, input, select {
+        font-size: 0.85rem;
+    }
+
+    .btn-filtrar {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+}

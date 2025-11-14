@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Empleado | LogiTrack</title>
+    <link rel="stylesheet" href="./perfil.css">
+</head>
+<body>
+    <div class="perfil-container">
+        <h2>Mi Perfil</h2>
+
+        <div class="perfil-info">
+            <img src="../../assets/user-icon.png" alt="Foto de perfil" class="perfil-foto">
+
+            <div class="perfil-datos">
+                <p><strong>Nombre:</strong> <span id="nombre">Juan Pérez</span></p>
+                <p><strong>Correo:</strong> <span id="correo">juanperez@logitrack.com</span></p>
+                <p><strong>Rol:</strong> <span id="rol">Empleado</span></p>
+            </div>
+        </div>
+
+        <h3>Actualizar información</h3>
+        <form id="perfilForm">
+            <label for="nuevoNombre">Nuevo nombre:</label>
+            <input type="text" id="nuevoNombre" placeholder="Escribe tu nuevo nombre">
+
+            <label for="nuevoCorreo">Nuevo correo:</label>
+            <input type="email" id="nuevoCorreo" placeholder="Escribe tu nuevo correo">
+
+            <label for="nuevaContra">Nueva contraseña:</label>
+            <input type="password" id="nuevaContra" placeholder="••••••••">
+
+            <button type="submit">Actualizar perfil</button>
+        </form>
+
+        <a href="../../user-dashboard.html" class="btn-volver">⬅ Volver al Dashboard</a>
+    </div>
+
+    <script src="./perfil.js"></script>
+</body>
+</html>

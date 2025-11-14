@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogiTrack | Módulo de Auditoría</title>
+    <link rel="stylesheet" href="./auditoria.css" />
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <h1>🔍 Registro de Auditorías</h1>
+        <button id="backBtn" class="back-btn">⬅ Volver al Dashboard</button>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container">
+        <!-- FILTROS DE BÚSQUEDA -->
+        <div class="filters">
+            <input type="text" id="searchUser" placeholder="Buscar por usuario..." />
+            <select id="filterType">
+                <option value="">Tipo de operación</option>
+                <option value="INSERT">INSERT</option>
+                <option value="UPDATE">UPDATE</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+            <input type="date" id="fromDate" />
+            <input type="date" id="toDate" />
+            <button id="filterBtn">Filtrar</button>
+            <button id="clearBtn" class="action-btn">Limpiar</button>
+        </div>
+
+        <!-- TABLA DE AUDITORÍAS -->
+        <div class="table-container">
+            <table id="auditTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Entidad</th>
+                        <th>Tipo Operación</th>
+                        <th>Fecha</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se inyectan las auditorías desde JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="./auditoria.js"></script>
+</body>
+
+</html>

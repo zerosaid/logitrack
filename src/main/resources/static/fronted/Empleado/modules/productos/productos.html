@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Productos | LogiTrack</title>
+    <link rel="stylesheet" href="productos.css">
+</head>
+<body>
+    <div class="productos-container">
+        <h2>Gestión de Productos</h2>
+
+        <form id="productoForm">
+            <div class="form-group">
+                <label for="nombre">Nombre del producto:</label>
+                <input type="text" id="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="categoria">Categoría:</label>
+                <input type="text" id="categoria" required>
+            </div>
+
+            <div class="form-group">
+                <label for="precio">Precio:</label>
+                <input type="number" id="precio" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="stock">Stock disponible:</label>
+                <input type="number" id="stock" min="0" required>
+            </div>
+
+            <button type="submit">Guardar producto</button>
+        </form>
+
+        <table id="tablaProductos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Productos generados dinámicamente -->
+            </tbody>
+        </table>
+
+        <a href="../../user-dashboard.html" class="btn-volver">⬅ Volver al Dashboard</a>
+    </div>
+
+    <script src="productos.js"></script>
+</body>
+</html>
