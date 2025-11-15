@@ -23,7 +23,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
         Auditoria a = new Auditoria();
         a.setEntidad(entidad);
         a.setEntidadId(entidadId);
-        a.setOperacion(operacion); // ahora string directo
+        a.setOperacion(operacion);
         a.setUsuario(usuario);
         a.setFechaHora(LocalDateTime.now());
         a.setValoresAntes(valoresAntes);
@@ -46,24 +46,23 @@ public class AuditoriaServiceImpl implements AuditoriaService {
         return auditoriaRepository.findAll();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Optional obtenerPorId(Long id) {
-        throw new UnsupportedOperationException("Unimplemented method 'obtenerPorId'");
+    public Optional<Auditoria> obtenerPorId(Long id) {
+        return auditoriaRepository.findById(id);
     }
 
     @Override
     public List<Auditoria> buscarPorEntidad(String entidad) {
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorEntidad'");
+        return auditoriaRepository.findByEntidad(entidad);
     }
 
     @Override
     public List<Auditoria> buscarPorRango(LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorRango'");
+        return auditoriaRepository.findByFechaHoraBetween(fechaDesde, fechaHasta);
     }
 
     @Override
     public void eliminarAuditoria(Long id) {
-        throw new UnsupportedOperationException("Unimplemented method 'eliminarAuditoria'");
+        auditoriaRepository.deleteById(id);
     }
 }
