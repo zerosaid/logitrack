@@ -160,6 +160,23 @@ tbody tr:hover {
     transition: 0.3s ease;
 }
 
+    .message {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        display: none;
+    }
+    .message.success {
+        background-color: #d4edda;
+        color: #155724;
+        display: block;
+    }
+    .message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        display: block;
+    }
+
 /* ====== Responsividad ====== */
 /* Tablets y pantallas medianas */
 @media (max-width: 900px) {
