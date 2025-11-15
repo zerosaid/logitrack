@@ -6,28 +6,44 @@ import java.util.List;
 import com.c3.logitrack.model.enums.Role;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"username"}),
+        @UniqueConstraint(columnNames = {"email"})
+    })
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String username;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String nombre;
+
+    @Column(nullable = false)
     private String email;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false)
     private boolean activo = true;
 
-    @Column(name = "fecha_registro", nullable = false)
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Movimiento> movimientos;
+
+    // ===== Constructores =====
+    public User() {}
 
     // ===== Getters y Setters =====
     public Long getId() { return id; }
@@ -58,6 +74,6 @@ public class User {
     public void setMovimientos(List<Movimiento> movimientos) { this.movimientos = movimientos; }
 
     public String getRoleDescripcion() {
-        return role != null ? role.getDescripcion() : "Sin rol";
+        return role != null ? role.getDescripcion() : "Sin rol definido";
     }
 }
