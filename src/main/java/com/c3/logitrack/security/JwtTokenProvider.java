@@ -2,15 +2,14 @@ package com.c3.logitrack.security;
 
 import com.c3.logitrack.model.User;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
@@ -18,8 +17,8 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    // Usar una clave segura generada por Keys.secretKeyFor
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
@@ -29,14 +28,12 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        Key key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS512.getJcaName());
-
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("role", user.getRole().name())  // ← Añadimos el rol
+                .claim("role", user.getRole().name()) // Añadimos el rol
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -46,22 +43,19 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        Key key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS512.getJcaName());
-
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 
     // === OBTENER USERNAME DEL TOKEN ===
     public String getUsernameFromJwt(String token) {
         try {
-            Key key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS512.getJcaName());
             return Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
@@ -75,9 +69,8 @@ public class JwtTokenProvider {
     // === VALIDAR TOKEN ===
     public boolean validateToken(String token) {
         try {
-            Key key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS512.getJcaName());
             Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
 
