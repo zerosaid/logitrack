@@ -9,8 +9,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(originPatterns = "*")
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;
@@ -33,11 +33,15 @@ public class UserController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    // === LISTAR TODOS LOS USUARIOS ===
+    // === LISTAR TODOS LOS USUARIOS (solo activos por defecto) ===
     @GetMapping
     public ResponseEntity<List<User>> listarTodos() {
-        List<User> usuarios = userService.listarTodos();
-        usuarios.forEach(u -> u.setPassword(null)); // ocultamos contraseña
+        List<User> usuarios = userService.listarTodosActivos();
+        usuarios.forEach(u -> {
+            u.setPassword(null);
+            u.setMovimientos(null); // Evitar ciclos infinitos
+        });
+        System.out.println("Usuarios activos encontrados: " + usuarios.size()); // Depuración
         return ResponseEntity.ok(usuarios);
     }
 
@@ -77,12 +81,13 @@ public class UserController {
                     respuesta.put("username", u.getUsername());
                     respuesta.put("role", u.getRole().name());
                     respuesta.put("descripcionRol", u.getRoleDescripcion());
+                    respuesta.put("activo", u.isActivo()); // Añadir estado
                     return ResponseEntity.ok(respuesta);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // === LOGIN DE USUARIO (nuevo endpoint) ===
+    // === LOGIN DE USUARIO ===
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -112,6 +117,8 @@ public class UserController {
     // === CREAR NUEVO USUARIO (solo ADMIN) ===
     @PostMapping("/crear/{creadorUsername}")
     public ResponseEntity<?> crearUsuario(@PathVariable String creadorUsername, @RequestBody User nuevoUsuario) {
+        System.out.println("Intentando crear usuario con creador: " + creadorUsername);
+        System.out.println("Datos recibidos: " + nuevoUsuario);
         try {
             User creado = userService.crearUsuario(nuevoUsuario, creadorUsername);
             creado.setPassword(null);
@@ -146,8 +153,23 @@ public class UserController {
         try {
             userService.desactivarUsuario(id, editorUsername);
             return ResponseEntity.noContent().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al desactivar el usuario: " + e.getMessage());
+        }
+    }
+
+    // === ELIMINAR USUARIO (nuevo endpoint) ===
+    @DeleteMapping("/eliminar/{id}/{editorUsername}")
+    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id, @PathVariable String editorUsername) {
+        try {
+            userService.eliminarUsuario(id, editorUsername);
+            return ResponseEntity.noContent().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al eliminar el usuario: " + e.getMessage());
         }
     }
 }

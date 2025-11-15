@@ -19,7 +19,7 @@ import com.c3.logitrack.service.MovimientoService;
 
 @RestController
 @RequestMapping("/api/movimientos")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
 public class MovimientoController {
 
     private final MovimientoService movimientoService;
