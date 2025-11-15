@@ -1,5 +1,7 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,19 +15,24 @@ public class Movimiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "producto_id")
+    @JsonBackReference("producto-movimiento-item")
+    private Producto producto;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoMovimiento tipo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private User usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bodega_origen_id")
     private Bodega bodegaOrigen;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bodega_destino_id")
     private Bodega bodegaDestino;
 
@@ -35,7 +42,8 @@ public class Movimiento {
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "movimiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "movimiento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("movimiento-item")
     private List<MovimientoItem> items;
 
     // ===== Getters y Setters =====

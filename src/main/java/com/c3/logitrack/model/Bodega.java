@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,13 +21,16 @@ public class Bodega {
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "bodega", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "bodega", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("bodega-stock")
     private List<Stock> stocks;
 
-    @OneToMany(mappedBy = "bodegaOrigen", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "bodegaOrigen", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("bodega-movimiento-origen")
     private List<Movimiento> movimientosOrigen;
 
-    @OneToMany(mappedBy = "bodegaDestino", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "bodegaDestino", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("bodega-movimiento-destino")
     private List<Movimiento> movimientosDestino;
 
     // ===== Getters y Setters =====

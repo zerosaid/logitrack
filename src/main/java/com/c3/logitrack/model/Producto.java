@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,20 +16,20 @@ public class Producto {
     private String nombre;
     private String categoria;
     private Double precio;
+    private Integer stock;
 
-    @Column(nullable = false)
-    private Integer stock = 0;
-
-    @Column(name = "fecha_registro", nullable = false)
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "producto")
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("producto-stock")
     private List<Stock> stocks;
 
-    @OneToMany(mappedBy = "producto")
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("producto-movimiento-item")
     private List<MovimientoItem> movimientoItems;
 
-    // ===== Getters y Setters =====
+    // Getters y Setters...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

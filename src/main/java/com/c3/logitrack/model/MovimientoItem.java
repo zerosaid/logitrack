@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -13,10 +14,12 @@ public class MovimientoItem {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "movimiento_id", nullable = false)
+    @JsonBackReference("movimiento-item")
     private Movimiento movimiento;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
+    @JsonBackReference("producto-item")
     private Producto producto;
 
     @Column(nullable = false)
