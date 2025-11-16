@@ -1,18 +1,14 @@
 package com.c3.logitrack.service;
 
+import com.c3.logitrack.dto.ProductoCreateDTO;
 import com.c3.logitrack.model.Producto;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductoService {
-
-    List<Producto> listarTodos();
-
-    Optional<Producto> buscarPorId(Long id);
-
-    Producto guardar(Producto producto);
-
-    Producto actualizar(Long id, Producto producto);
-
-    boolean eliminar(Long id);
+    Producto crearProducto(ProductoCreateDTO productoDTO);
+    List<Producto> listarProductos();
+    Optional<Producto> obtenerProductoPorId(Long id);
+    Optional<Producto> actualizarProducto(Long id, ProductoCreateDTO productoDTO);
+    boolean eliminarProducto(Long id);
 }

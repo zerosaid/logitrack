@@ -1,53 +1,64 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LogiTrack | Productos</title>
-    <link rel="stylesheet" href="./productos.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogiTrack | Gestión de Productos</title>
+    <link rel="stylesheet" href="./productos.css" />
 </head>
-
 <body>
-    <header class="header">
-        <h1>Gestión de Productos</h1>
-        <button id="backBtn" class="back-btn">⬅ Volver al Dashboard</button>
-    </header>
+    <nav class="navbar">
+        <h1>📦 Gestión de Productos</h1>
+        <button id="backBtn">⬅ Volver al Dashboard</button>
+    </nav>
 
-    <main class="container">
+    <div class="container">
+        <!-- MENSAJES DE FEEDBACK -->
+        <div id="message" class="message"></div>
+
+        <!-- FORMULARIO -->
         <section class="form-section">
-            <h2>Registrar / Editar Producto</h2>
+            <h2>Registrar nuevo producto</h2>
             <form id="productoForm">
-                <input type="text" id="codigo" placeholder="Código del producto" required>
-                <input type="text" id="nombre" placeholder="Nombre del producto" required>
-                <input type="number" id="cantidad" placeholder="Cantidad" min="0" required>
-                <input type="text" id="categoria" placeholder="Categoría" required>
-                <input type="number" id="precio" placeholder="Precio" min="0.01" step="0.01" required>
-                <button type="submit">Guardar</button>
+                <label for="codigo">Código</label>
+                <input type="text" id="codigo" required placeholder="Ej: P001" />
+
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" required placeholder="Ej: Laptop Dell" />
+
+                <label for="categoria">Categoría</label>
+                <input type="text" id="categoria" required placeholder="Ej: Electrónica" />
+
+                <label for="precio">Precio</label>
+                <input type="number" id="precio" required min="0" step="0.01" placeholder="Ej: 3500.00" />
+
+                <label for="stockMin">Stock Mínimo</label>
+                <input type="number" id="stockMin" required min="0" placeholder="Ej: 5" />
+
+                <button type="submit">💾 Guardar Producto</button>
             </form>
         </section>
 
-        <section class="table-section">
-            <h2>Inventario de Productos</h2>
-            <table id="tablaProductos">
+        <!-- TABLA -->
+        <section class="tabla-section">
+            <h2>Listado de Productos</h2>
+            <table id="productoTable">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Código</th>
                         <th>Nombre</th>
-                        <th>Cantidad</th>
                         <th>Categoría</th>
                         <th>Precio</th>
+                        <th>Stock Mínimo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Filas dinámicas -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </section>
-    </main>
+    </div>
 
     <script src="./productos.js"></script>
 </body>
-
 </html>

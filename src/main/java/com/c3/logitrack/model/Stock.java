@@ -28,9 +28,6 @@ public class Stock {
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion = LocalDateTime.now();
 
-    // Constructores
-    public Stock() {}
-
     // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

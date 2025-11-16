@@ -242,7 +242,7 @@ public class MovimientoServiceImpl implements MovimientoService {
         Producto p = productoRepository.findById(productoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado id=" + productoId));
 
-        p.setStock(total);
+        p.setStockMin(total);
         productoRepository.save(p);
     }
 

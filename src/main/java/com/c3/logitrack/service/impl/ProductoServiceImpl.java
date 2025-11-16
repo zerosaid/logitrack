@@ -1,5 +1,6 @@
 package com.c3.logitrack.service.impl;
 
+import com.c3.logitrack.dto.ProductoCreateDTO;
 import com.c3.logitrack.model.Producto;
 import com.c3.logitrack.repository.ProductoRepository;
 import com.c3.logitrack.service.ProductoService;
@@ -18,60 +19,76 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public List<Producto> listarTodos() {
-        List<Producto> productos = productoRepository.findAll();
-        productos.forEach(p -> {
-            p.setStocks(null);
-            p.setMovimientoItems(null);
-        });
-        return productos;
-    }
-
-    @Override
-    public Optional<Producto> buscarPorId(Long id) {
-        Optional<Producto> producto = productoRepository.findById(id);
-        producto.ifPresent(p -> {
-            p.setStocks(null);
-            p.setMovimientoItems(null);
-        });
-        return producto;
-    }
-
-    @Override
-    public Producto guardar(Producto producto) {
-        if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre del producto es obligatorio");
+    public Producto crearProducto(ProductoCreateDTO productoDTO) {
+        if (productoDTO.getCodigo() == null || productoDTO.getCodigo().isBlank()) {
+            throw new IllegalArgumentException("El código del producto es obligatorio.");
         }
-        if (producto.getPrecio() == null) {
-            throw new IllegalArgumentException("El precio del producto es obligatorio");
+        if (productoDTO.getNombre() == null || productoDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio.");
         }
+        if (productoDTO.getCategoria() == null || productoDTO.getCategoria().isBlank()) {
+            throw new IllegalArgumentException("La categoría del producto es obligatoria.");
+        }
+        if (productoDTO.getPrecio() == null || productoDTO.getPrecio() < 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor o igual a 0.");
+        }
+        if (productoDTO.getStockMin() == null || productoDTO.getStockMin() < 0) {
+            throw new IllegalArgumentException("El stock mínimo debe ser mayor o igual a 0.");
+        }
+
+        Producto producto = new Producto();
+        producto.setCodigo(productoDTO.getCodigo());
+        producto.setNombre(productoDTO.getNombre());
+        producto.setCategoria(productoDTO.getCategoria());
+        producto.setPrecio(productoDTO.getPrecio());
+        producto.setStockMin(productoDTO.getStockMin());
         return productoRepository.save(producto);
     }
 
     @Override
-    public Producto actualizar(Long id, Producto producto) {
-        return productoRepository.findById(id).map(p -> {
-            if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
-                throw new IllegalArgumentException("El nombre del producto es obligatorio");
-            }
-            if (producto.getPrecio() == null) {
-                throw new IllegalArgumentException("El precio del producto es obligatorio");
-            }
-
-            p.setNombre(producto.getNombre());
-            p.setCategoria(producto.getCategoria());
-            p.setPrecio(producto.getPrecio());
-            p.setStocks(producto.getStocks());
-            return productoRepository.save(p);
-        }).orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+    public List<Producto> listarProductos() {
+        return productoRepository.findAll();
     }
 
     @Override
-    public boolean eliminar(Long id) {
-        if (!productoRepository.existsById(id)) {
-            return false;
+    public Optional<Producto> obtenerProductoPorId(Long id) {
+        return productoRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Producto> actualizarProducto(Long id, ProductoCreateDTO productoDTO) {
+        if (productoDTO.getCodigo() == null || productoDTO.getCodigo().isBlank()) {
+            throw new IllegalArgumentException("El código del producto es obligatorio.");
         }
-        productoRepository.deleteById(id);
-        return true;
+        if (productoDTO.getNombre() == null || productoDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio.");
+        }
+        if (productoDTO.getCategoria() == null || productoDTO.getCategoria().isBlank()) {
+            throw new IllegalArgumentException("La categoría del producto es obligatoria.");
+        }
+        if (productoDTO.getPrecio() == null || productoDTO.getPrecio() < 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor o igual a 0.");
+        }
+        if (productoDTO.getStockMin() == null || productoDTO.getStockMin() < 0) {
+            throw new IllegalArgumentException("El stock mínimo debe ser mayor o igual a 0.");
+        }
+
+        return productoRepository.findById(id).map(existente -> {
+            existente.setCodigo(productoDTO.getCodigo());
+            existente.setNombre(productoDTO.getNombre());
+            existente.setCategoria(productoDTO.getCategoria());
+            existente.setPrecio(productoDTO.getPrecio());
+            existente.setStockMin(productoDTO.getStockMin());
+            return productoRepository.save(existente);
+        });
+    }
+
+    @Override
+    public boolean eliminarProducto(Long id) {
+        if (productoRepository.existsById(id)) {
+            productoRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
