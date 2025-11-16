@@ -74,26 +74,21 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     @Transactional
     public Movimiento registrarMovimiento(MovimientoCreateDTO movimientoDTO) {
-        if (movimientoDTO.getTipo() == null) {
-            throw new IllegalArgumentException("El tipo de movimiento es obligatorio.");
-        }
-        if (movimientoDTO.getUsuarioId() == null) {
-            throw new IllegalArgumentException("El usuario es obligatorio.");
-        }
-        if (movimientoDTO.getItems() == null || movimientoDTO.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Debe incluir al menos un ítem.");
-        }
-        if (movimientoDTO.getTipo() == TipoMovimiento.ENTRADA && movimientoDTO.getBodegaDestinoId() == null) {
-            throw new IllegalArgumentException("La bodega destino es obligatoria para entradas.");
-        }
-        if (movimientoDTO.getTipo() == TipoMovimiento.SALIDA && movimientoDTO.getBodegaOrigenId() == null) {
-            throw new IllegalArgumentException("La bodega origen es obligatoria para salidas.");
-        }
-        if (movimientoDTO.getTipo() == TipoMovimiento.TRANSFERENCIA &&
-                (movimientoDTO.getBodegaOrigenId() == null || movimientoDTO.getBodegaDestinoId() == null)) {
-            throw new IllegalArgumentException("Ambas bodegas son obligatorias para transferencias.");
-        }
+        // Validaciones
+        if (movimientoDTO.getTipo() == null) throw new IllegalArgumentException("El tipo de movimiento es obligatorio.");
+        if (movimientoDTO.getUsuarioId() == null) throw new IllegalArgumentException("El usuario es obligatorio.");
+        if (movimientoDTO.getItems() == null || movimientoDTO.getItems().isEmpty()) throw new IllegalArgumentException("Debe incluir al menos un ítem.");
 
+        // Validar bodegas según tipo
+        if (movimientoDTO.getTipo() == TipoMovimiento.ENTRADA && movimientoDTO.getBodegaDestinoId() == null)
+            throw new IllegalArgumentException("La bodega destino es obligatoria para entradas.");
+        if (movimientoDTO.getTipo() == TipoMovimiento.SALIDA && movimientoDTO.getBodegaOrigenId() == null)
+            throw new IllegalArgumentException("La bodega origen es obligatoria para salidas.");
+        if (movimientoDTO.getTipo() == TipoMovimiento.TRANSFERENCIA && 
+            (movimientoDTO.getBodegaOrigenId() == null || movimientoDTO.getBodegaDestinoId() == null))
+            throw new IllegalArgumentException("Ambas bodegas son obligatorias para transferencias.");
+
+        // Buscar entidades
         User usuario = userRepository.findById(movimientoDTO.getUsuarioId())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
         Bodega bodegaOrigen = movimientoDTO.getBodegaOrigenId() != null ?
@@ -103,33 +98,34 @@ public class MovimientoServiceImpl implements MovimientoService {
                 bodegaRepository.findById(movimientoDTO.getBodegaDestinoId())
                         .orElseThrow(() -> new IllegalArgumentException("Bodega destino no encontrada.")) : null;
 
-        // Crear y guardar el movimiento básico primero para obtener el ID
+        // 1. Crear y guardar el movimiento básico primero (sin ítems)
         Movimiento movimiento = new Movimiento();
         movimiento.setTipo(movimientoDTO.getTipo());
         movimiento.setBodegaOrigen(bodegaOrigen);
         movimiento.setBodegaDestino(bodegaDestino);
         movimiento.setUsuario(usuario);
         movimiento.setFecha(LocalDateTime.now());
-        movimiento = movimientoRepository.save(movimiento); // Guardar primero para obtener el ID
+        movimiento = movimientoRepository.save(movimiento); // Guardar para obtener el ID
 
-        // Procesar y asociar los ítems después de que el movimiento tenga un ID
+        // 2. Procesar y agregar ítems manualmente
         List<MovimientoItem> items = new ArrayList<>();
         for (MovimientoCreateDTO.MovimientoItemDTO itemDTO : movimientoDTO.getItems()) {
-            if (itemDTO.getProductoId() == null || itemDTO.getCantidad() == null || itemDTO.getCantidad() <= 0) {
+            if (itemDTO.getProductoId() == null || itemDTO.getCantidad() == null || itemDTO.getCantidad() <= 0)
                 throw new IllegalArgumentException("Producto y cantidad son obligatorios y deben ser mayores que 0.");
-            }
-            if (itemDTO.getPrecioUnitario() == null) {
+            if (itemDTO.getPrecioUnitario() == null)
                 throw new IllegalArgumentException("El precio unitario es obligatorio.");
-            }
+
             Producto producto = productoRepository.findById(itemDTO.getProductoId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
+
             MovimientoItem item = new MovimientoItem();
-            item.setMovimiento(movimiento);
+            item.setMovimiento(movimiento); // Establecer la relación
             item.setProducto(producto);
             item.setCantidad(itemDTO.getCantidad());
             item.setPrecioUnitario(itemDTO.getPrecioUnitario());
             items.add(item);
 
+            // Actualizar stock
             try {
                 if (movimientoDTO.getTipo() == TipoMovimiento.ENTRADA) {
                     stockService.ajustarCantidad(movimientoDTO.getBodegaDestinoId(), itemDTO.getProductoId(), itemDTO.getCantidad(), true);
@@ -143,8 +139,10 @@ public class MovimientoServiceImpl implements MovimientoService {
                 throw new IllegalArgumentException("Error al ajustar el stock: " + e.getMessage());
             }
         }
+
+        // 3. Asignar ítems y guardar nuevamente
         movimiento.setItems(items);
-        return movimientoRepository.save(movimiento); // Guardar nuevamente con los ítems
+        return movimientoRepository.save(movimiento); // Hibernate manejará la inserción de ítems
     }
 
     @Override
@@ -153,15 +151,9 @@ public class MovimientoServiceImpl implements MovimientoService {
         Movimiento existente = movimientoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Movimiento no encontrado."));
 
-        if (movimientoDTO.getTipo() == null) {
-            throw new IllegalArgumentException("El tipo de movimiento es obligatorio.");
-        }
-        if (movimientoDTO.getUsuarioId() == null) {
-            throw new IllegalArgumentException("El usuario es obligatorio.");
-        }
-        if (movimientoDTO.getItems() == null || movimientoDTO.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Debe incluir al menos un ítem.");
-        }
+        if (movimientoDTO.getTipo() == null) throw new IllegalArgumentException("El tipo de movimiento es obligatorio.");
+        if (movimientoDTO.getUsuarioId() == null) throw new IllegalArgumentException("El usuario es obligatorio.");
+        if (movimientoDTO.getItems() == null || movimientoDTO.getItems().isEmpty()) throw new IllegalArgumentException("Debe incluir al menos un ítem.");
 
         revertStock(existente);
 
@@ -179,18 +171,15 @@ public class MovimientoServiceImpl implements MovimientoService {
         existente.setBodegaDestino(bodegaDestino);
         existente.setUsuario(usuario);
         existente.setFecha(LocalDateTime.now());
-        if (existente.getItems() == null) {
-            existente.setItems(new ArrayList<>());
-        }
+        if (existente.getItems() == null) existente.setItems(new ArrayList<>());
         existente.getItems().clear();
 
         for (MovimientoCreateDTO.MovimientoItemDTO itemDTO : movimientoDTO.getItems()) {
-            if (itemDTO.getProductoId() == null || itemDTO.getCantidad() == null || itemDTO.getCantidad() <= 0) {
+            if (itemDTO.getProductoId() == null || itemDTO.getCantidad() == null || itemDTO.getCantidad() <= 0)
                 throw new IllegalArgumentException("Producto y cantidad son obligatorios y deben ser mayores que 0.");
-            }
-            if (itemDTO.getPrecioUnitario() == null) {
+            if (itemDTO.getPrecioUnitario() == null)
                 throw new IllegalArgumentException("El precio unitario es obligatorio.");
-            }
+
             Producto producto = productoRepository.findById(itemDTO.getProductoId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
             MovimientoItem item = new MovimientoItem();
@@ -232,9 +221,7 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     @Transactional(readOnly = true)
     public List<Movimiento> listarUltimos(int cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
-        }
+        if (cantidad <= 0) throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
         return movimientoRepository.findAllByOrderByFechaDesc(PageRequest.of(0, cantidad));
     }
 
