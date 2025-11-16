@@ -2,8 +2,6 @@ package com.c3.logitrack.controller;
 
 import com.c3.logitrack.model.Movimiento;
 import com.c3.logitrack.service.MovimientoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +15,6 @@ import java.util.Optional;
 public class MovimientoController {
 
     private final MovimientoService movimientoService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MovimientoController(MovimientoService movimientoService) {
         this.movimientoService = movimientoService;
@@ -25,81 +22,62 @@ public class MovimientoController {
 
     @GetMapping
     public ResponseEntity<List<Movimiento>> listarTodos() {
-        try {
-            List<Movimiento> movimientos = movimientoService.listarTodos();
-            System.out.println("Movimientos encontrados (sin serializar): " + movimientos.size());
-            String jsonResponse = objectMapper.writeValueAsString(movimientos);
-            System.out.println("JSON generado: " + jsonResponse);
-            movimientos.forEach(this::limpiarRelaciones);
-            return ResponseEntity.ok(movimientos);
-        } catch (Exception e) {
-            System.err.println("Error al listar movimientos: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(null);
-        }
+        List<Movimiento> movimientos = movimientoService.listarTodos();
+        movimientos.forEach(this::limpiarRelaciones);
+        return ResponseEntity.ok(movimientos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Movimiento> obtenerPorId(@PathVariable Long id) {
-        try {
-            Optional<Movimiento> movimientoOpt = movimientoService.obtenerPorId(id);
-            if (movimientoOpt.isPresent()) {
-                Movimiento movimiento = movimientoOpt.get();
-                limpiarRelaciones(movimiento);
-                return ResponseEntity.ok(movimiento);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            System.err.println("Error al buscar movimiento por ID " + id + ": " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(null);
-        }
+        Optional<Movimiento> movimientoOpt = movimientoService.obtenerPorId(id);
+        return movimientoOpt.map(m -> {
+            limpiarRelaciones(m);
+            return ResponseEntity.ok(m);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/buscar")
     public ResponseEntity<List<Movimiento>> buscarPorRango(
             @RequestParam("desde") String desde,
             @RequestParam("hasta") String hasta) {
-        try {
-            LocalDateTime fechaDesde = LocalDateTime.parse(desde);
-            LocalDateTime fechaHasta = LocalDateTime.parse(hasta);
-            List<Movimiento> resultados = movimientoService.buscarPorRango(fechaDesde, fechaHasta);
-            resultados.forEach(this::limpiarRelaciones);
-            return ResponseEntity.ok(resultados);
-        } catch (Exception e) {
-            System.err.println("Error al buscar por rango de fechas: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(null);
-        }
+        LocalDateTime fechaDesde = LocalDateTime.parse(desde);
+        LocalDateTime fechaHasta = LocalDateTime.parse(hasta);
+        List<Movimiento> resultados = movimientoService.buscarPorRango(fechaDesde, fechaHasta);
+        resultados.forEach(this::limpiarRelaciones);
+        return ResponseEntity.ok(resultados);
     }
 
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<List<Movimiento>> buscarPorTipo(@PathVariable String tipo) {
-        try {
-            List<Movimiento> resultados = movimientoService.buscarPorTipo(tipo.toUpperCase());
-            resultados.forEach(this::limpiarRelaciones);
-            return ResponseEntity.ok(resultados);
-        } catch (Exception e) {
-            System.err.println("Error al buscar por tipo de movimiento: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(null);
-        }
+        List<Movimiento> resultados = movimientoService.buscarPorTipo(tipo.toUpperCase());
+        resultados.forEach(this::limpiarRelaciones);
+        return ResponseEntity.ok(resultados);
     }
 
     @PostMapping
     public ResponseEntity<?> registrarMovimiento(@RequestBody Movimiento movimiento) {
-        try {
-            Movimiento nuevo = movimientoService.registrarMovimiento(movimiento);
-            limpiarRelaciones(nuevo);
-            return ResponseEntity.ok(nuevo);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Error al registrar el movimiento: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error al registrar el movimiento: " + e.getMessage());
+        Movimiento nuevo = movimientoService.registrarMovimiento(movimiento);
+        limpiarRelaciones(nuevo);
+        return ResponseEntity.ok(nuevo);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarMovimiento(@PathVariable Long id, @RequestBody Movimiento movimiento) {
+        Optional<Movimiento> movExistenteOpt = movimientoService.obtenerPorId(id);
+        if (movExistenteOpt.isPresent()) {
+            Movimiento actualizado = movimientoService.actualizarMovimiento(id, movimiento);
+            limpiarRelaciones(actualizado);
+            return ResponseEntity.ok(actualizado);
+        } else {
+            return ResponseEntity.notFound().build();
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarMovimiento(@PathVariable Long id) {
+        boolean eliminado = movimientoService.eliminarMovimiento(id);
+        if (eliminado) return ResponseEntity.ok().build();
+        return ResponseEntity.notFound().build();
     }
 
     private void limpiarRelaciones(Movimiento m) {
@@ -122,7 +100,7 @@ public class MovimientoController {
             });
         }
         if (m.getUsuario() != null) {
-            m.getUsuario().setMovimientos(null); // Añadido para User si tiene relación
+            m.getUsuario().setMovimientos(null);
         }
     }
 }
