@@ -13,22 +13,31 @@ public class Bodega {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
+
+    @Column(nullable = false)
     private String ubicacion;
-    private Double capacidad;
+
+    @Column(nullable = false)
+    private Integer capacidad; // Coincide con tu SQL (INT)
+
     private String encargado;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
+    // Relación con Stock
     @OneToMany(mappedBy = "bodega", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("bodega-stock")
     private List<Stock> stocks;
 
+    // Movimientos donde la bodega es origen
     @OneToMany(mappedBy = "bodegaOrigen", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("bodega-movimiento-origen")
     private List<Movimiento> movimientosOrigen;
 
+    // Movimientos donde la bodega es destino
     @OneToMany(mappedBy = "bodegaDestino", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("bodega-movimiento-destino")
     private List<Movimiento> movimientosDestino;
@@ -43,8 +52,8 @@ public class Bodega {
     public String getUbicacion() { return ubicacion; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
 
-    public Double getCapacidad() { return capacidad; }
-    public void setCapacidad(Double capacidad) { this.capacidad = capacidad; }
+    public Integer getCapacidad() { return capacidad; }
+    public void setCapacidad(Integer capacidad) { this.capacidad = capacidad; }
 
     public String getEncargado() { return encargado; }
     public void setEncargado(String encargado) { this.encargado = encargado; }

@@ -2,6 +2,7 @@ package com.c3.logitrack.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.c3.logitrack.model.enums.TipoOperacion;  
 
 @Entity
 @Table(name = "auditoria")
@@ -13,7 +14,11 @@ public class Auditoria {
 
     private String entidad;
     private Long entidadId;
-    private String operacion; // INSERT, UPDATE, DELETE
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoOperacion operacion; // INSERT, UPDATE, DELETE
+
     private String usuario;
 
     @Column(name = "fecha_hora", nullable = false)
@@ -25,6 +30,19 @@ public class Auditoria {
     @Lob
     private String valoresDespues;
 
+    // ===== Constructores =====
+    public Auditoria() {}
+
+    public Auditoria(String entidad, Long entidadId, TipoOperacion operacion, String usuario, String valoresAntes, String valoresDespues) {
+        this.entidad = entidad;
+        this.entidadId = entidadId;
+        this.operacion = operacion;
+        this.usuario = usuario;
+        this.valoresAntes = valoresAntes;
+        this.valoresDespues = valoresDespues;
+        this.fechaHora = LocalDateTime.now();
+    }
+
     // ===== Getters y Setters =====
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -35,8 +53,8 @@ public class Auditoria {
     public Long getEntidadId() { return entidadId; }
     public void setEntidadId(Long entidadId) { this.entidadId = entidadId; }
 
-    public String getOperacion() { return operacion; }
-    public void setOperacion(String operacion) { this.operacion = operacion; }
+    public TipoOperacion getOperacion() { return operacion; }
+    public void setOperacion(TipoOperacion operacion) { this.operacion = operacion; }
 
     public String getUsuario() { return usuario; }
     public void setUsuario(String usuario) { this.usuario = usuario; }

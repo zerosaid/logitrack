@@ -1,7 +1,8 @@
 package com.c3.logitrack.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,35 +16,34 @@ public class Movimiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "producto_id")
-    @JsonBackReference("producto-movimiento-item")
-    private Producto producto;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoMovimiento tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonBackReference("user-movimiento")
     private User usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bodega_origen_id")
+    @JsonBackReference("bodega-movimiento-origen")
     private Bodega bodegaOrigen;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bodega_destino_id")
+    @JsonBackReference("bodega-movimiento-destino")
     private Bodega bodegaDestino;
 
     @Column(length = 500)
     private String observaciones;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime fecha = LocalDateTime.now();
 
     @OneToMany(mappedBy = "movimiento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference("movimiento-item")
+    @JsonManagedReference("movimiento-item") // evita ciclo con MovimientoItem
     private List<MovimientoItem> items;
 
     // ===== Getters y Setters =====

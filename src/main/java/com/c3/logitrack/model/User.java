@@ -40,8 +40,9 @@ public class User {
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
+    // Relación con movimientos
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference("user-movimiento")
+    @JsonManagedReference("user-movimiento") // referencia hacia Movimiento
     private List<Movimiento> movimientos;
 
     // ===== Constructores =====
@@ -75,6 +76,7 @@ public class User {
     public List<Movimiento> getMovimientos() { return movimientos; }
     public void setMovimientos(List<Movimiento> movimientos) { this.movimientos = movimientos; }
 
+    // Descripción legible del rol
     public String getRoleDescripcion() {
         return role != null ? role.getDescripcion() : "Sin rol definido";
     }

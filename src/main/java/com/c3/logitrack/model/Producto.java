@@ -1,9 +1,11 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "producto")
@@ -13,28 +15,41 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre", length = 150, nullable = false)
+    @Column(name = "codigo", length = 50, unique = true, nullable = false)
+    private String codigo;
+
+    @Column(name = "nombre", length = 255, nullable = false)
     private String nombre;
 
-    @Column(name = "categoria", length = 100)
+    @Column(name = "categoria", length = 255, nullable = false)
     private String categoria;
 
-    @Column(name = "precio", nullable = false, precision = 12, scale = 2)
+    @Column(name = "precio", nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
 
+    @Column(name = "stock_min", nullable = false)
+    private int stockMin = 5;
+
     @Column(name = "fecha_registro", nullable = false)
-    private LocalDateTime fechaRegistro;
+    private LocalDateTime fechaRegistro = LocalDateTime.now();
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Evita serialización circular con Stock
     private List<Stock> stocks;
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Evita serialización circular con MovimientoItem
     private List<MovimientoItem> movimientoItems;
 
-    // Constructores
-    public Producto() {}
+    @Transient
+    private int stock; // stock total calculado (no persistido directamente)
 
-    public Producto(String nombre, String categoria, BigDecimal precio) {
+    // Constructores
+    public Producto() {
+    }
+
+    public Producto(String codigo, String nombre, String categoria, BigDecimal precio) {
+        this.codigo = codigo;
         this.nombre = nombre;
         this.categoria = categoria;
         this.precio = precio;
@@ -48,6 +63,14 @@ public class Producto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     public String getNombre() {
@@ -74,6 +97,14 @@ public class Producto {
         this.precio = precio;
     }
 
+    public int getStockMin() {
+        return stockMin;
+    }
+
+    public void setStockMin(int stockMin) {
+        this.stockMin = stockMin;
+    }
+
     public LocalDateTime getFechaRegistro() {
         return fechaRegistro;
     }
@@ -98,8 +129,17 @@ public class Producto {
         this.movimientoItems = movimientoItems;
     }
 
-    public void setStock(int total) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setStock'");
+    // Getter de stock
+    public int getStock() {
+        if (stocks != null && !stocks.isEmpty()) {
+            return stocks.stream()
+                    .mapToInt(Stock::getCantidad) // no hay null, int directo
+                    .sum();
+        }
+        return 0; // si no hay stocks
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 }
