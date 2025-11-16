@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "bodega")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Bodega {
 
     @Id
@@ -20,29 +22,29 @@ public class Bodega {
     private String ubicacion;
 
     @Column(nullable = false)
-    private Integer capacidad; // Coincide con tu SQL (INT)
+    private Integer capacidad;
 
     private String encargado;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
-    // Relación con Stock
     @OneToMany(mappedBy = "bodega", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("bodega-stock")
     private List<Stock> stocks;
 
-    // Movimientos donde la bodega es origen
     @OneToMany(mappedBy = "bodegaOrigen", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("bodega-movimiento-origen")
     private List<Movimiento> movimientosOrigen;
 
-    // Movimientos donde la bodega es destino
     @OneToMany(mappedBy = "bodegaDestino", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("bodega-movimiento-destino")
     private List<Movimiento> movimientosDestino;
 
-    // ===== Getters y Setters =====
+    // Constructores
+    public Bodega() {}
+
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

@@ -1,11 +1,10 @@
 package com.c3.logitrack.service.impl;
 
+import com.c3.logitrack.dto.BodegaCreateDTO;
 import com.c3.logitrack.model.Bodega;
 import com.c3.logitrack.repository.BodegaRepository;
 import com.c3.logitrack.service.BodegaService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +19,22 @@ public class BodegaServiceImpl implements BodegaService {
     }
 
     @Override
-    public Bodega crearBodega(Bodega bodega) {
-        if (bodega.getNombre() == null || bodega.getNombre().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre de la bodega es obligatorio.");
+    public Bodega crearBodega(BodegaCreateDTO bodegaDTO) {
+        if (bodegaDTO.getNombre() == null || bodegaDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre de la bodega es obligatorio.");
         }
+        if (bodegaDTO.getUbicacion() == null || bodegaDTO.getUbicacion().isBlank()) {
+            throw new IllegalArgumentException("La ubicación de la bodega es obligatoria.");
+        }
+        if (bodegaDTO.getCapacidad() == null || bodegaDTO.getCapacidad() < 0) {
+            throw new IllegalArgumentException("La capacidad debe ser mayor o igual a 0.");
+        }
+
+        Bodega bodega = new Bodega();
+        bodega.setNombre(bodegaDTO.getNombre());
+        bodega.setUbicacion(bodegaDTO.getUbicacion());
+        bodega.setCapacidad(bodegaDTO.getCapacidad());
+        bodega.setEncargado(bodegaDTO.getEncargado());
         return bodegaRepository.save(bodega);
     }
 
@@ -38,12 +49,22 @@ public class BodegaServiceImpl implements BodegaService {
     }
 
     @Override
-    public Optional<Bodega> actualizarBodega(Long id, Bodega bodega) {
+    public Optional<Bodega> actualizarBodega(Long id, BodegaCreateDTO bodegaDTO) {
+        if (bodegaDTO.getNombre() == null || bodegaDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre de la bodega es obligatorio.");
+        }
+        if (bodegaDTO.getUbicacion() == null || bodegaDTO.getUbicacion().isBlank()) {
+            throw new IllegalArgumentException("La ubicación de la bodega es obligatoria.");
+        }
+        if (bodegaDTO.getCapacidad() == null || bodegaDTO.getCapacidad() < 0) {
+            throw new IllegalArgumentException("La capacidad debe ser mayor o igual a 0.");
+        }
+
         return bodegaRepository.findById(id).map(existente -> {
-            existente.setNombre(bodega.getNombre());
-            existente.setUbicacion(bodega.getUbicacion());
-            existente.setCapacidad(bodega.getCapacidad());
-            existente.setEncargado(bodega.getEncargado());
+            existente.setNombre(bodegaDTO.getNombre());
+            existente.setUbicacion(bodegaDTO.getUbicacion());
+            existente.setCapacidad(bodegaDTO.getCapacidad());
+            existente.setEncargado(bodegaDTO.getEncargado());
             return bodegaRepository.save(existente);
         });
     }
@@ -57,4 +78,3 @@ public class BodegaServiceImpl implements BodegaService {
         return false;
     }
 }
-

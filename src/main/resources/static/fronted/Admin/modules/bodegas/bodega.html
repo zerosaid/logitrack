@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LogiTrack | Gestión de Bodegas</title>
     <link rel="stylesheet" href="./bodega.css" />
 </head>
-
 <body>
     <nav class="navbar">
         <h1>🏭 Gestión de Bodegas</h1>
@@ -32,7 +30,7 @@
                 <input type="number" id="capacidad" required min="0" placeholder="Ej: 5000" />
 
                 <label for="encargado">Encargado</label>
-                <input type="text" id="encargado" required placeholder="Ej: Juan Pérez" />
+                <input type="text" id="encargado" placeholder="Ej: Juan Pérez" />
 
                 <button type="submit">💾 Guardar Bodega</button>
             </form>
@@ -44,7 +42,7 @@
             <table id="bodegaTable">
                 <thead>
                     <tr>
-                        <th>#</th> <!-- Cambiado a # para reflejar el índice visual -->
+                        <th>#</th>
                         <th>Nombre</th>
                         <th>Ubicación</th>
                         <th>Capacidad</th>
@@ -52,15 +50,11 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Filas dinámicas -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </section>
     </div>
 
     <script src="./bodega.js"></script>
-</head>
-
 </body>
 </html>

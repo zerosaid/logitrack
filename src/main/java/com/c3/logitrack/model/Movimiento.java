@@ -29,10 +29,12 @@ public class Movimiento {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bodega_origen_id")
+    @JsonBackReference("bodega-movimiento-origen")
     private Bodega bodegaOrigen;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bodega_destino_id")
+    @JsonBackReference("bodega-movimiento-destino")
     private Bodega bodegaDestino;
 
     private String observaciones;
@@ -47,67 +49,27 @@ public class Movimiento {
     }
 
     // Getters y Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
+    public TipoMovimiento getTipo() { return tipo; }
+    public void setTipo(TipoMovimiento tipo) { this.tipo = tipo; }
 
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
+    public User getUsuario() { return usuario; }
+    public void setUsuario(User usuario) { this.usuario = usuario; }
 
-    public TipoMovimiento getTipo() {
-        return tipo;
-    }
+    public Bodega getBodegaOrigen() { return bodegaOrigen; }
+    public void setBodegaOrigen(Bodega bodegaOrigen) { this.bodegaOrigen = bodegaOrigen; }
 
-    public void setTipo(TipoMovimiento tipo) {
-        this.tipo = tipo;
-    }
+    public Bodega getBodegaDestino() { return bodegaDestino; }
+    public void setBodegaDestino(Bodega bodegaDestino) { this.bodegaDestino = bodegaDestino; }
 
-    public User getUsuario() {
-        return usuario;
-    }
+    public String getObservaciones() { return observaciones; }
+    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
-    public void setUsuario(User usuario) {
-        this.usuario = usuario;
-    }
-
-    public Bodega getBodegaOrigen() {
-        return bodegaOrigen;
-    }
-
-    public void setBodegaOrigen(Bodega bodegaOrigen) {
-        this.bodegaOrigen = bodegaOrigen;
-    }
-
-    public Bodega getBodegaDestino() {
-        return bodegaDestino;
-    }
-
-    public void setBodegaDestino(Bodega bodegaDestino) {
-        this.bodegaDestino = bodegaDestino;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
-
-    public List<MovimientoItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<MovimientoItem> items) {
-        this.items = items;
-    }
+    public List<MovimientoItem> getItems() { return items; }
+    public void setItems(List<MovimientoItem> items) { this.items = items; }
 }
