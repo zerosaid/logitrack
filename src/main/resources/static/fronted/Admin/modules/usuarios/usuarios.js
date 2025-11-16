@@ -21,26 +21,26 @@ function cargarUsuarios() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => {
-        console.log('Respuesta del servidor (cargar):', response);
-        if (!response.ok) {
-            throw new Error(`Error al cargar usuarios: ${response.status} - ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Datos recibidos (cargar):', data);
-        if (!Array.isArray(data)) {
-            throw new Error('La respuesta no es un array de usuarios');
-        }
-        usuarios = data;
-        renderUsuarios();
-    })
-    .catch(error => {
-        console.error('Error al cargar usuarios:', error);
-        alert('Error al cargar el listado de usuarios: ' + error.message);
-        tablaBody.innerHTML = '<tr><td colspan="6">Error al cargar datos. Revisa la consola (F12) para más detalles.</td></tr>';
-    });
+        .then(response => {
+            console.log('Respuesta del servidor (cargar):', response);
+            if (!response.ok) {
+                throw new Error(`Error al cargar usuarios: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos recibidos (cargar):', data);
+            if (!Array.isArray(data)) {
+                throw new Error('La respuesta no es un array de usuarios');
+            }
+            usuarios = data;
+            renderUsuarios();
+        })
+        .catch(error => {
+            console.error('Error al cargar usuarios:', error);
+            alert('Error al cargar el listado de usuarios: ' + error.message);
+            tablaBody.innerHTML = '<tr><td colspan="6">Error al cargar datos. Revisa la consola (F12) para más detalles.</td></tr>';
+        });
 }
 
 // Renderizar tabla
@@ -90,28 +90,26 @@ form.addEventListener("submit", (e) => {
         username: username,
         nombre: document.getElementById("nombre").value.trim(),
         email: document.getElementById("correo").value.trim(),
-        role: document.getElementById("rol").value,
+        role: document.getElementById("rol").value.toUpperCase(),
         password: contrasena,
-        activo: true // Por defecto activo
+        activo: true
     };
 
     const token = sessionStorage.getItem('token');
     const creadorUsername = sessionStorage.getItem('username');
     console.log('Token:', token);
     console.log('Creador Username:', creadorUsername);
+    console.log('Datos enviados:', JSON.stringify(nuevoUsuario, null, 2));
+
     if (!token) {
         alert('No estás autenticado. Inicia sesión nuevamente.');
         window.location.href = '/fronted/index.html';
         return;
     }
     if (!creadorUsername) {
-        alert('No se pudo identificar al usuario creador. Inicia sesión nuevamente. Verifica el login.');
-        console.error('creadorUsername es null. Asegúrate de que el login guarde "username" en sessionStorage.');
+        alert('No se pudo identificar al usuario creador. Inicia sesión nuevamente.');
         return;
     }
-
-    console.log('Enviando solicitud POST a:', `/api/usuarios/crear/${creadorUsername}`);
-    console.log('Datos enviados:', nuevoUsuario);
 
     fetch(`/api/usuarios/crear/${creadorUsername}`, {
         method: 'POST',
@@ -121,23 +119,26 @@ form.addEventListener("submit", (e) => {
         },
         body: JSON.stringify(nuevoUsuario)
     })
-    .then(response => {
-        console.log('Respuesta del servidor (crear):', response);
-        if (!response.ok) {
-            return response.text().then(text => { throw new Error(`Error al crear usuario: ${response.status} - ${text}`); });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Datos recibidos (crear):', data);
-        usuarios.push(data);
-        form.reset();
-        renderUsuarios();
-    })
-    .catch(error => {
-        console.error('Error al crear usuario:', error);
-        alert('Error al crear el usuario: ' + error.message);
-    });
+        .then(response => {
+            console.log('Respuesta del servidor (crear):', response);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Error al crear usuario: ${response.status} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Usuario creado:', data);
+            usuarios.push(data);
+            form.reset();
+            renderUsuarios();
+            alert('Usuario creado exitosamente');
+        })
+        .catch(error => {
+            console.error('Error al crear usuario:', error);
+            alert('Error al crear el usuario: ' + error.message);
+        });
 });
 
 // Editar / Eliminar usuario
@@ -185,26 +186,26 @@ tablaBody.addEventListener("click", (e) => {
                 'Authorization': `Bearer ${token}`
             }
         })
-        .then(response => {
-            console.log(`Respuesta del servidor (${action}):`, response);
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(`Error al ${action} usuario: ${response.status} - ${text}`); });
-            }
-            if (action === 'desactivar') {
-                usuarios[index].activo = false; // Actualizar estado local
-            } else {
-                usuarios.splice(index, 1); // Eliminar de la lista si es eliminación
-            }
-            renderUsuarios();
-        })
-        .catch(error => {
-            console.error(`Error al ${action} usuario:`, error);
-            alert(`Error al ${action} el usuario: ${error.message}`);
-            if (action === 'eliminar') {
-                usuarios.splice(index, 0, usuarios[index]); // Revertir si falla
-            }
-            renderUsuarios();
-        });
+            .then(response => {
+                console.log(`Respuesta del servidor (${action}):`, response);
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Error al ${action} usuario: ${response.status} - ${text}`); });
+                }
+                if (action === 'desactivar') {
+                    usuarios[index].activo = false; // Actualizar estado local
+                } else {
+                    usuarios.splice(index, 1); // Eliminar de la lista si es eliminación
+                }
+                renderUsuarios();
+            })
+            .catch(error => {
+                console.error(`Error al ${action} usuario:`, error);
+                alert(`Error al ${action} el usuario: ${error.message}`);
+                if (action === 'eliminar') {
+                    usuarios.splice(index, 0, usuarios[index]); // Revertir si falla
+                }
+                renderUsuarios();
+            });
     }
 });
 
