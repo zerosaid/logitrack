@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos | LogiTrack</title>
+    <link rel="stylesheet" href="./movimientos.css">
+</head>
+<body>
+    <!-- ====== Encabezado ====== -->
+    <header class="header">
+        <h1>📦 Registro de Movimientos</h1>
+        <button id="btnVolver" class="back-btn">⬅ Volver al Dashboard</button>
+    </header>
+
+    <!-- ====== Contenedor principal ====== -->
+    <main class="container">
+        <!-- Filtros -->
+        <section class="filtros">
+            <h2>Filtrar Movimientos</h2>
+            <div class="form-group">
+                <label for="tipoMovimiento">Tipo:</label>
+                <select id="tipoMovimiento">
+                    <option value="todos">Todos</option>
+                    <option value="entrada">Entrada</option>
+                    <option value="salida">Salida</option>
+                    <option value="traslado">Traslado</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fechaInicio">Desde:</label>
+                <input type="date" id="fechaInicio">
+            </div>
+
+            <div class="form-group">
+                <label for="fechaFin">Hasta:</label>
+                <input type="date" id="fechaFin">
+            </div>
+
+            <button id="btnFiltrar" class="btn-filtrar">Aplicar Filtros</button>
+        </section>
+
+        <!-- Tabla de resultados -->
+        <section class="tabla">
+            <h2>Historial de Movimientos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Producto</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaBody">
+                    <tr><td colspan="5">Cargando movimientos...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="./movimientos.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes | LogiTrack</title>
+    <link rel="stylesheet" href="reportes.css">
+</head>
+<body>
+    <header class="header">
+        <h1>📊 Generación de Reportes</h1>
+        <button id="btnVolver" class="back-btn">⬅ Volver al Dashboard</button>
+    </header>
+
+    <main class="container">
+        <!-- Sección de filtros -->
+        <section class="filtros">
+            <h2>Filtrar Reportes</h2>
+
+            <div class="form-group">
+                <label for="tipoReporte">Tipo de reporte:</label>
+                <select id="tipoReporte">
+                    <option value="inventario">Inventario</option>
+                    <option value="movimientos">Movimientos</option>
+                    <option value="productos">Productos</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fechaInicio">Desde:</label>
+                <input type="date" id="fechaInicio">
+            </div>
+
+            <div class="form-group">
+                <label for="fechaFin">Hasta:</label>
+                <input type="date" id="fechaFin">
+            </div>
+
+            <button id="btnGenerar" class="btn-generar">Generar Reporte</button>
+        </section>
+
+        <!-- Vista del reporte -->
+        <section class="tabla">
+            <h2>Vista previa del reporte</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaReportes">
+                    <tr><td colspan="4">No hay datos disponibles</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="reportes.js"></script>
+</body>
+</html>

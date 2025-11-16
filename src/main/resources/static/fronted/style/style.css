@@ -1,0 +1,119 @@
+/* === Estilos generales === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #3c1361, #5f259f); /* Morado oscuro al violeta */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* === Contenedor del login === */
+.login-container {
+    background: #1e1e2f; /* Gris oscuro azulado */
+    padding: 2rem 3rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+    width: 350px;
+    text-align: center;
+}
+
+.login-container h1 {
+    color: #b388ff; /* Morado claro */
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+label {
+    font-size: 0.9rem;
+    color: #d1c4e9;
+}
+
+input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #5f259f;
+    border-radius: 8px;
+    margin-top: 0.3rem;
+    background-color: #2a2a3d;
+    color: #f5f5f5;
+}
+
+input:focus {
+    outline: none;
+    border-color: #b388ff;
+    box-shadow: 0 0 6px #b388ff;
+}
+
+.btn {
+    width: 100%;
+    background: linear-gradient(135deg, #5f259f, #7b2cbf);
+    color: white;
+    border: none;
+    padding: 0.7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background: linear-gradient(135deg, #7b2cbf, #9c4dcc);
+    transform: translateY(-2px);
+}
+
+#error-msg {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+/* === Grupo de contraseña === */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 45px; /* espacio para el botón del ojo */
+}
+
+/* === Botón de mostrar/ocultar === */
+.toggle-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-btn img {
+    width: 22px;
+    height: 22px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    filter: brightness(0) invert(1); /* hace el ícono blanco */
+}
+
+.toggle-btn:hover img {
+    opacity: 1;
+}

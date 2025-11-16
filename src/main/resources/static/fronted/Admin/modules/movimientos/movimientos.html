@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogiTrack | Movimientos de Inventario</title>
+    <link rel="stylesheet" href="./movimientos.css" />
+</head>
+
+<body>
+    <nav class="navbar">
+        <h1>📦 Movimientos de Inventario</h1>
+        <button id="backBtn">⬅ Volver al Dashboard</button>
+    </nav>
+
+    <div class="container">
+        <!-- FORMULARIO -->
+        <section class="form-section">
+            <h2>Registrar Movimiento</h2>
+            <form id="movForm">
+                <label for="tipo">Tipo de Movimiento</label>
+                <select id="tipo" required>
+                    <option value="">Seleccione...</option>
+                    <option value="ENTRADA">Entrada</option>
+                    <option value="SALIDA">Salida</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                </select>
+
+                <label for="producto">Producto</label>
+                <input type="text" id="producto" required placeholder="Ej: Aceite vegetal" />
+
+                <label for="cantidad">Cantidad</label>
+                <input type="number" id="cantidad" min="1" required placeholder="Ej: 50" />
+
+                <label for="origen">Bodega Origen</label>
+                <input type="text" id="origen" placeholder="Ej: Bodega Norte" />
+
+                <label for="destino">Bodega Destino</label>
+                <input type="text" id="destino" placeholder="Ej: Bodega Central" />
+
+                <label for="usuario">Usuario Responsable</label>
+                <input type="text" id="usuario" required placeholder="Ej: Juan Martínez" />
+
+                <button type="submit">💾 Registrar Movimiento</button>
+            </form>
+        </section>
+
+        <!-- TABLA -->
+        <section class="tabla-section">
+            <h2>Historial de Movimientos</h2>
+            <table id="movTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Usuario</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="./movimientos.js"></script>
+</body>
+
+</html>
