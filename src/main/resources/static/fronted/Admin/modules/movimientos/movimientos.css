@@ -15,50 +15,29 @@ body {
 
 /* ====== Navbar ====== */
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     background: linear-gradient(90deg, #3a0ca3, #7209b7);
     color: white;
-    padding: 15px 30px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-}
-
-.navbar h1 {
-    font-size: 1.4rem;
-    font-weight: 600;
-}
-
-.navbar button {
-    background-color: #b5179e;
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
     font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.navbar button:hover {
-    background-color: #7209b7;
-    transform: translateY(-2px);
-}
-
-/* ====== Contenedor principal ====== */
+/* ====== Contenedor general ====== */
 .container {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 30px;
+    gap: 35px;
     padding: 40px;
 }
 
-/* ====== Formulario ====== */
+/* ====== Sección del formulario ====== */
 .form-section {
     background-color: #2b2b3c;
     padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
     border-left: 5px solid #9d4edd;
 }
 
@@ -71,16 +50,17 @@ body {
 .form-section form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .form-section label {
     font-weight: 600;
+    margin-bottom: 4px;
     color: #ddd;
 }
 
-.form-section input,
-.form-section select {
+.form-section select,
+.form-section input[type="number"] {
     padding: 10px;
     background-color: #3a3a4f;
     color: #f5f5f5;
@@ -91,15 +71,14 @@ body {
 
 .form-section button {
     background-color: #7209b7;
-    color: #fff;
+    color: white;
+    padding: 12px;
     border: none;
-    padding: 10px;
     border-radius: 10px;
-    cursor: pointer;
     font-weight: bold;
-    font-size: 1rem;
+    cursor: pointer;
     margin-top: 10px;
-    transition: all 0.3s ease;
+    transition: 0.3s;
 }
 
 .form-section button:hover {
@@ -111,14 +90,15 @@ body {
 .tabla-section {
     background-color: #2b2b3c;
     padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
     border-left: 5px solid #7209b7;
 }
 
 .tabla-section h2 {
     color: #b794f4;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
 }
 
 table {
@@ -133,7 +113,7 @@ thead {
 
 th,
 td {
-    padding: 12px;
+    padding: 14px;
     text-align: center;
     border-bottom: 1px solid #444;
 }
@@ -146,139 +126,37 @@ tbody tr:hover {
     background-color: #3c3c5c;
 }
 
-/* --- Tablets (hasta 1024px) --- */
+/* ====== Mensajes ====== */
+.message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    display: none;
+    font-weight: bold;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ====== Responsive ====== */
 @media (max-width: 1024px) {
-    .navbar {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-        padding: 15px 20px;
-    }
-
-    .navbar h1 {
-        font-size: 1.3rem;
-    }
-
-    .navbar button {
-        width: 100%;
-        max-width: 200px;
-    }
-
     .container {
         grid-template-columns: 1fr;
-        gap: 25px;
-        padding: 25px;
-    }
-
-    table th,
-    table td {
-        padding: 10px;
-        font-size: 0.95rem;
     }
 }
 
-/* --- Móviles grandes (hasta 768px) --- */
 @media (max-width: 768px) {
-    body {
-        font-size: 0.95rem;
-    }
-
-    .container {
-        padding: 20px;
-        gap: 20px;
-    }
-
-    .form-section,
-    .tabla-section {
-        padding: 20px;
-    }
-
-    .form-section h2,
-    .tabla-section h2 {
-        text-align: center;
-        font-size: 1.2rem;
-    }
-
-    .form-section form {
-        gap: 10px;
-    }
-
-    .form-section input,
-    .form-section select,
-    .form-section button {
-        font-size: 0.9rem;
-        padding: 8px;
-    }
-
     table {
-        display: block;
         overflow-x: auto;
+        display: block;
         white-space: nowrap;
-    }
-
-    th,
-    td {
-        padding: 8px;
-        font-size: 0.9rem;
-    }
-
-    .navbar button {
-        font-size: 0.9rem;
-        padding: 8px 14px;
-    }
-}
-
-/* --- Móviles pequeños (hasta 480px) --- */
-@media (max-width: 480px) {
-    .navbar {
-        padding: 10px 15px;
-    }
-
-    .navbar h1 {
-        font-size: 1.1rem;
-    }
-
-    .navbar button {
-        width: 100%;
-        font-size: 0.9rem;
-        padding: 8px 10px;
-    }
-
-    .container {
-        padding: 15px;
-    }
-
-    .form-section,
-    .tabla-section {
-        padding: 15px;
-        border-left: none;
-        border-top: 4px solid #9d4edd;
-    }
-
-    .form-section h2,
-    .tabla-section h2 {
-        font-size: 1rem;
-    }
-
-    .form-section input,
-    .form-section select {
-        font-size: 0.85rem;
-        padding: 7px;
-    }
-
-    .form-section button {
-        width: 100%;
-        padding: 10px;
-        font-size: 0.9rem;
-    }
-
-    th,
-    td {
-        font-size: 0.85rem;
-        padding: 6px;
-    }
-
-    table {
-        font-size: 0.85rem;
     }
 }
