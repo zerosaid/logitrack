@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/movimientos")
@@ -20,6 +22,7 @@ public class MovimientoController {
         this.movimientoService = movimientoService;
     }
 
+    // === LISTAR TODOS LOS MOVIMIENTOS ===
     @GetMapping
     public ResponseEntity<List<Movimiento>> listarTodos() {
         List<Movimiento> movimientos = movimientoService.listarTodos();
@@ -27,6 +30,7 @@ public class MovimientoController {
         return ResponseEntity.ok(movimientos);
     }
 
+    // === OBTENER MOVIMIENTO POR ID ===
     @GetMapping("/{id}")
     public ResponseEntity<Movimiento> obtenerPorId(@PathVariable Long id) {
         Optional<Movimiento> movimientoOpt = movimientoService.obtenerPorId(id);
@@ -36,6 +40,7 @@ public class MovimientoController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // === BUSCAR POR RANGO DE FECHAS ===
     @GetMapping("/buscar")
     public ResponseEntity<List<Movimiento>> buscarPorRango(
             @RequestParam("desde") String desde,
@@ -47,6 +52,7 @@ public class MovimientoController {
         return ResponseEntity.ok(resultados);
     }
 
+    // === BUSCAR POR TIPO DE MOVIMIENTO ===
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<List<Movimiento>> buscarPorTipo(@PathVariable String tipo) {
         List<Movimiento> resultados = movimientoService.buscarPorTipo(tipo.toUpperCase());
@@ -54,6 +60,7 @@ public class MovimientoController {
         return ResponseEntity.ok(resultados);
     }
 
+    // === REGISTRAR NUEVO MOVIMIENTO ===
     @PostMapping
     public ResponseEntity<?> registrarMovimiento(@RequestBody Movimiento movimiento) {
         Movimiento nuevo = movimientoService.registrarMovimiento(movimiento);
@@ -61,6 +68,7 @@ public class MovimientoController {
         return ResponseEntity.ok(nuevo);
     }
 
+    // === ACTUALIZAR MOVIMIENTO ===
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarMovimiento(@PathVariable Long id, @RequestBody Movimiento movimiento) {
         Optional<Movimiento> movExistenteOpt = movimientoService.obtenerPorId(id);
@@ -73,13 +81,25 @@ public class MovimientoController {
         }
     }
 
+    // === ELIMINAR MOVIMIENTO ===
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarMovimiento(@PathVariable Long id) {
         boolean eliminado = movimientoService.eliminarMovimiento(id);
-        if (eliminado) return ResponseEntity.ok().build();
-        return ResponseEntity.notFound().build();
+        return eliminado ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
+    // === ENDPOINT PARA DASHBOARD: MOVIMIENTOS RECIENTES ===
+    @GetMapping("/recientes")
+    public ResponseEntity<Map<String, Object>> movimientosRecientes() {
+        List<Movimiento> recientes = movimientoService.listarUltimos(5); // últimos 5 movimientos
+        recientes.forEach(this::limpiarRelaciones);
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalRecientes", recientes.size());
+        response.put("movimientos", recientes);
+        return ResponseEntity.ok(response);
+    }
+
+    // === LIMPIEZA DE RELACIONES PARA EVITAR CICLOS ===
     private void limpiarRelaciones(Movimiento m) {
         if (m.getBodegaOrigen() != null) {
             m.getBodegaOrigen().setStocks(null);
