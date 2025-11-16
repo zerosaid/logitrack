@@ -2,6 +2,7 @@ package com.c3.logitrack.service;
 
 import com.c3.logitrack.model.Bodega;
 import java.util.List;
+import java.util.Optional;
 
 public interface BodegaService {
 
@@ -21,21 +22,22 @@ public interface BodegaService {
     /**
      * Busca una bodega por su identificador.
      * @param id ID de la bodega
-     * @return Bodega encontrada o null si no existe
+     * @return Optional con la bodega encontrada
      */
-    Bodega obtenerBodegaPorId(Long id);
+    Optional<Bodega> obtenerBodegaPorId(Long id);
 
     /**
      * Actualiza una bodega existente.
      * @param id ID de la bodega a actualizar
      * @param bodega Datos actualizados
-     * @return Bodega actualizada
+     * @return Optional con la bodega actualizada
      */
-    Bodega actualizarBodega(Long id, Bodega bodega);
+    Optional<Bodega> actualizarBodega(Long id, Bodega bodega);
 
     /**
      * Elimina una bodega por su ID.
      * @param id ID de la bodega a eliminar
+     * @return true si se eliminó correctamente, false si no existía
      */
-    void eliminarBodega(Long id);
+    boolean eliminarBodega(Long id);
 }

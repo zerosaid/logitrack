@@ -8,6 +8,9 @@ import com.c3.logitrack.service.AuditoriaService;
 import com.c3.logitrack.service.MovimientoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -73,7 +76,6 @@ public class MovimientoServiceImpl implements MovimientoService {
 
         validarMovimiento(movimiento);
 
-        // Actualizar campos principales
         existente.setTipo(movimiento.getTipo());
         existente.setBodegaOrigen(movimiento.getBodegaOrigen());
         existente.setBodegaDestino(movimiento.getBodegaDestino());
@@ -98,26 +100,22 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     @Transactional
     public boolean eliminarMovimiento(Long id) {
-        Movimiento mov = movimientoRepository.findById(id).orElse(null);
-        if (mov == null) return false;
+        Optional<Movimiento> movOpt = movimientoRepository.findById(id);
+        if (movOpt.isEmpty()) return false;
 
+        Movimiento mov = movOpt.get();
         String usuario = mov.getUsuario() != null ? mov.getUsuario().getUsername() : "SYSTEM";
 
-        // Ajustar stock en reversa antes de eliminar
         if (mov.getItems() != null) {
             for (MovimientoItem item : mov.getItems()) {
                 Producto producto = item.getProducto();
                 switch (mov.getTipo()) {
-                    case ENTRADA:
-                        ajustarStock(mov.getBodegaDestino(), producto, item.getCantidad(), false, usuario);
-                        break;
-                    case SALIDA:
-                        ajustarStock(mov.getBodegaOrigen(), producto, item.getCantidad(), true, usuario);
-                        break;
-                    case TRANSFERENCIA:
+                    case ENTRADA -> ajustarStock(mov.getBodegaDestino(), producto, item.getCantidad(), false, usuario);
+                    case SALIDA -> ajustarStock(mov.getBodegaOrigen(), producto, item.getCantidad(), true, usuario);
+                    case TRANSFERENCIA -> {
                         ajustarStock(mov.getBodegaOrigen(), producto, item.getCantidad(), true, usuario);
                         ajustarStock(mov.getBodegaDestino(), producto, item.getCantidad(), false, usuario);
-                        break;
+                    }
                 }
             }
         }
@@ -135,6 +133,15 @@ public class MovimientoServiceImpl implements MovimientoService {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Tipo de movimiento no válido: " + tipo);
         }
+    }
+
+    @Override
+    public List<Movimiento> listarUltimos(int cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
+        }
+        Pageable pageable = PageRequest.of(0, cantidad, Sort.by("fecha").descending());
+        return movimientoRepository.findAllByOrderByFechaDesc(pageable);
     }
 
     // =================== MÉTODOS AUXILIARES ===================
@@ -173,22 +180,22 @@ public class MovimientoServiceImpl implements MovimientoService {
             item.setProducto(producto);
 
             switch (saved.getTipo()) {
-                case ENTRADA:
+                case ENTRADA -> {
                     if (saved.getBodegaDestino() == null)
                         throw new IllegalArgumentException("Bodega destino requerida para ENTRADA.");
                     ajustarStock(saved.getBodegaDestino(), producto, item.getCantidad(), true, usuario);
-                    break;
-                case SALIDA:
+                }
+                case SALIDA -> {
                     if (saved.getBodegaOrigen() == null)
                         throw new IllegalArgumentException("Bodega origen requerida para SALIDA.");
                     ajustarStock(saved.getBodegaOrigen(), producto, item.getCantidad(), false, usuario);
-                    break;
-                case TRANSFERENCIA:
+                }
+                case TRANSFERENCIA -> {
                     if (saved.getBodegaOrigen() == null || saved.getBodegaDestino() == null)
                         throw new IllegalArgumentException("Bodega origen y destino requeridas para TRANSFERENCIA.");
                     ajustarStock(saved.getBodegaOrigen(), producto, item.getCantidad(), false, usuario);
                     ajustarStock(saved.getBodegaDestino(), producto, item.getCantidad(), true, usuario);
-                    break;
+                }
             }
 
             movimientoItemRepository.save(item);

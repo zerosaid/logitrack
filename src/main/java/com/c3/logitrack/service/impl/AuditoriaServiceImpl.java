@@ -1,6 +1,7 @@
 package com.c3.logitrack.service.impl;
 
 import com.c3.logitrack.model.Auditoria;
+import com.c3.logitrack.model.enums.TipoOperacion;
 import com.c3.logitrack.repository.AuditoriaRepository;
 import com.c3.logitrack.service.AuditoriaService;
 import org.springframework.stereotype.Service;
@@ -19,26 +20,16 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     }
 
     @Override
-    public Auditoria crearAuditoria(String entidad, Long entidadId, String operacion, String usuario, String valoresAntes, String valoresDespues) {
+    public Auditoria crearAuditoria(String entidad, Long entidadId, String usuario, String operacion, String valoresAntes, String valoresDespues) {
         Auditoria a = new Auditoria();
         a.setEntidad(entidad);
         a.setEntidadId(entidadId);
-        a.setOperacion(operacion);
         a.setUsuario(usuario);
+        a.setOperacion(TipoOperacion.valueOf(operacion.toUpperCase()));
         a.setFechaHora(LocalDateTime.now());
         a.setValoresAntes(valoresAntes);
         a.setValoresDespues(valoresDespues);
         return auditoriaRepository.save(a);
-    }
-
-    @Override
-    public List<Auditoria> listarPorUsuario(String usuario) {
-        return auditoriaRepository.findByUsuario(usuario);
-    }
-
-    @Override
-    public List<Auditoria> listarPorOperacion(String operacion) {
-        return auditoriaRepository.findByOperacion(operacion);
     }
 
     @Override
@@ -52,6 +43,16 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     }
 
     @Override
+    public List<Auditoria> listarPorUsuario(String usuario) {
+        return auditoriaRepository.findByUsuario(usuario);
+    }
+
+    @Override
+    public List<Auditoria> listarPorOperacion(String operacion) {
+        return auditoriaRepository.findByOperacion(TipoOperacion.valueOf(operacion.toUpperCase()));
+    }
+
+    @Override
     public List<Auditoria> buscarPorEntidad(String entidad) {
         return auditoriaRepository.findByEntidad(entidad);
     }
@@ -62,7 +63,17 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     }
 
     @Override
-    public void eliminarAuditoria(Long id) {
-        auditoriaRepository.deleteById(id);
+    public boolean eliminarAuditoria(Long id) {
+        if (auditoriaRepository.existsById(id)) {
+            auditoriaRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<Auditoria> listarPendientes() {
+        // Si no tienes lógica aún, devolver lista vacía en vez de lanzar excepción
+        return List.of();
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BodegaServiceImpl implements BodegaService {
@@ -32,28 +33,28 @@ public class BodegaServiceImpl implements BodegaService {
     }
 
     @Override
-    public Bodega obtenerBodegaPorId(Long id) {
-        return bodegaRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bodega no encontrada con ID: " + id));
+    public Optional<Bodega> obtenerBodegaPorId(Long id) {
+        return bodegaRepository.findById(id);
     }
 
     @Override
-    public Bodega actualizarBodega(Long id, Bodega bodega) {
-        Bodega existente = obtenerBodegaPorId(id);
-
-        existente.setNombre(bodega.getNombre());
-        existente.setUbicacion(bodega.getUbicacion());
-        existente.setCapacidad(bodega.getCapacidad());
-        existente.setEncargado(bodega.getEncargado());
-
-        return bodegaRepository.save(existente);
+    public Optional<Bodega> actualizarBodega(Long id, Bodega bodega) {
+        return bodegaRepository.findById(id).map(existente -> {
+            existente.setNombre(bodega.getNombre());
+            existente.setUbicacion(bodega.getUbicacion());
+            existente.setCapacidad(bodega.getCapacidad());
+            existente.setEncargado(bodega.getEncargado());
+            return bodegaRepository.save(existente);
+        });
     }
 
     @Override
-    public void eliminarBodega(Long id) {
-        if (!bodegaRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se puede eliminar: la bodega no existe.");
+    public boolean eliminarBodega(Long id) {
+        if (bodegaRepository.existsById(id)) {
+            bodegaRepository.deleteById(id);
+            return true;
         }
-        bodegaRepository.deleteById(id);
+        return false;
     }
 }
+
