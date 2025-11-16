@@ -1,20 +1,11 @@
 package com.c3.logitrack.service.impl;
 
 import com.c3.logitrack.exeption.ResourceNotFoundException;
-import com.c3.logitrack.model.Bodega;
-import com.c3.logitrack.model.Movimiento;
-import com.c3.logitrack.model.MovimientoItem;
-import com.c3.logitrack.model.Producto;
-import com.c3.logitrack.model.Stock;
+import com.c3.logitrack.model.*;
 import com.c3.logitrack.model.enums.TipoMovimiento;
-import com.c3.logitrack.repository.BodegaRepository;
-import com.c3.logitrack.repository.MovimientoItemRepository;
-import com.c3.logitrack.repository.MovimientoRepository;
-import com.c3.logitrack.repository.ProductoRepository;
-import com.c3.logitrack.repository.StockRepository;
+import com.c3.logitrack.repository.*;
 import com.c3.logitrack.service.AuditoriaService;
 import com.c3.logitrack.service.MovimientoService;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,13 +22,12 @@ public class MovimientoServiceImpl implements MovimientoService {
     private final AuditoriaService auditoriaService;
     private final BodegaRepository bodegaRepository;
 
-    public MovimientoServiceImpl(
-            MovimientoRepository movimientoRepository,
-            MovimientoItemRepository movimientoItemRepository,
-            StockRepository stockRepository,
-            ProductoRepository productoRepository,
-            AuditoriaService auditoriaService,
-            BodegaRepository bodegaRepository) {
+    public MovimientoServiceImpl(MovimientoRepository movimientoRepository,
+                                 MovimientoItemRepository movimientoItemRepository,
+                                 StockRepository stockRepository,
+                                 ProductoRepository productoRepository,
+                                 AuditoriaService auditoriaService,
+                                 BodegaRepository bodegaRepository) {
         this.movimientoRepository = movimientoRepository;
         this.movimientoItemRepository = movimientoItemRepository;
         this.stockRepository = stockRepository;
@@ -64,16 +54,97 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     @Transactional
     public Movimiento registrarMovimiento(Movimiento movimiento) {
-        // Validaciones básicas
-        if (movimiento.getTipo() == null) {
+        validarMovimiento(movimiento);
+
+        Movimiento saved = movimientoRepository.save(movimiento);
+        String usuario = movimiento.getUsuario() != null ? movimiento.getUsuario().getUsername() : "SYSTEM";
+
+        procesarItems(saved, usuario);
+        auditar("Movimiento", saved.getId(), usuario, "Registro de movimiento", "{}");
+
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Movimiento actualizarMovimiento(Long id, Movimiento movimiento) {
+        Movimiento existente = movimientoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Movimiento no encontrado id=" + id));
+
+        validarMovimiento(movimiento);
+
+        // Actualizar campos principales
+        existente.setTipo(movimiento.getTipo());
+        existente.setBodegaOrigen(movimiento.getBodegaOrigen());
+        existente.setBodegaDestino(movimiento.getBodegaDestino());
+        existente.setUsuario(movimiento.getUsuario());
+        existente.setFecha(LocalDateTime.now());
+
+        // Eliminar items antiguos
+        if (existente.getItems() != null) {
+            existente.getItems().forEach(i -> movimientoItemRepository.delete(i));
+        }
+        existente.setItems(movimiento.getItems());
+
+        Movimiento actualizado = movimientoRepository.save(existente);
+        String usuario = movimiento.getUsuario() != null ? movimiento.getUsuario().getUsername() : "SYSTEM";
+
+        procesarItems(actualizado, usuario);
+        auditar("Movimiento", actualizado.getId(), usuario, "Actualización de movimiento", "{}");
+
+        return actualizado;
+    }
+
+    @Override
+    @Transactional
+    public boolean eliminarMovimiento(Long id) {
+        Movimiento mov = movimientoRepository.findById(id).orElse(null);
+        if (mov == null) return false;
+
+        String usuario = mov.getUsuario() != null ? mov.getUsuario().getUsername() : "SYSTEM";
+
+        // Ajustar stock en reversa antes de eliminar
+        if (mov.getItems() != null) {
+            for (MovimientoItem item : mov.getItems()) {
+                Producto producto = item.getProducto();
+                switch (mov.getTipo()) {
+                    case ENTRADA:
+                        ajustarStock(mov.getBodegaDestino(), producto, item.getCantidad(), false, usuario);
+                        break;
+                    case SALIDA:
+                        ajustarStock(mov.getBodegaOrigen(), producto, item.getCantidad(), true, usuario);
+                        break;
+                    case TRANSFERENCIA:
+                        ajustarStock(mov.getBodegaOrigen(), producto, item.getCantidad(), true, usuario);
+                        ajustarStock(mov.getBodegaDestino(), producto, item.getCantidad(), false, usuario);
+                        break;
+                }
+            }
+        }
+
+        movimientoRepository.delete(mov);
+        auditar("Movimiento", id, usuario, "Eliminación de movimiento", "{}");
+        return true;
+    }
+
+    @Override
+    public List<Movimiento> buscarPorTipo(String tipo) {
+        try {
+            TipoMovimiento tipoEnum = TipoMovimiento.valueOf(tipo.toUpperCase());
+            return movimientoRepository.findByTipo(tipoEnum);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Tipo de movimiento no válido: " + tipo);
+        }
+    }
+
+    // =================== MÉTODOS AUXILIARES ===================
+    private void validarMovimiento(Movimiento movimiento) {
+        if (movimiento.getTipo() == null)
             throw new IllegalArgumentException("El tipo de movimiento es obligatorio.");
-        }
 
-        if (movimiento.getItems() == null || movimiento.getItems().isEmpty()) {
+        if (movimiento.getItems() == null || movimiento.getItems().isEmpty())
             throw new IllegalArgumentException("Debe registrar al menos un producto en el movimiento.");
-        }
 
-        // Validar y cargar bodegas
         if (movimiento.getBodegaOrigen() != null && movimiento.getBodegaOrigen().getId() != null) {
             Bodega origen = bodegaRepository.findById(movimiento.getBodegaOrigen().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Bodega origen no encontrada"));
@@ -86,22 +157,14 @@ public class MovimientoServiceImpl implements MovimientoService {
             movimiento.setBodegaDestino(destino);
         }
 
-        // Fecha por defecto
-        if (movimiento.getFecha() == null) {
+        if (movimiento.getFecha() == null)
             movimiento.setFecha(LocalDateTime.now());
-        }
+    }
 
-        // Guardar movimiento antes de items
-        Movimiento saved = movimientoRepository.save(movimiento);
-
-        // Usuario para auditoría
-        String usuario = (movimiento.getUsuario() != null)
-                ? movimiento.getUsuario().getUsername()
-                : "SYSTEM";
-
-        // Procesar items
+    private void procesarItems(Movimiento saved, String usuario) {
         Set<Long> productosAfectados = new HashSet<>();
-        for (MovimientoItem item : movimiento.getItems()) {
+
+        for (MovimientoItem item : saved.getItems()) {
             Producto producto = productoRepository.findById(item.getProducto().getId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Producto no encontrado id=" + item.getProducto().getId()));
@@ -109,19 +172,17 @@ public class MovimientoServiceImpl implements MovimientoService {
             item.setMovimiento(saved);
             item.setProducto(producto);
 
-            switch (movimiento.getTipo()) {
+            switch (saved.getTipo()) {
                 case ENTRADA:
                     if (saved.getBodegaDestino() == null)
                         throw new IllegalArgumentException("Bodega destino requerida para ENTRADA.");
                     ajustarStock(saved.getBodegaDestino(), producto, item.getCantidad(), true, usuario);
                     break;
-
                 case SALIDA:
                     if (saved.getBodegaOrigen() == null)
                         throw new IllegalArgumentException("Bodega origen requerida para SALIDA.");
                     ajustarStock(saved.getBodegaOrigen(), producto, item.getCantidad(), false, usuario);
                     break;
-
                 case TRANSFERENCIA:
                     if (saved.getBodegaOrigen() == null || saved.getBodegaDestino() == null)
                         throw new IllegalArgumentException("Bodega origen y destino requeridas para TRANSFERENCIA.");
@@ -131,21 +192,12 @@ public class MovimientoServiceImpl implements MovimientoService {
             }
 
             movimientoItemRepository.save(item);
-
-            // Auditoría item
             auditar("MovimientoItem", item.getId(), usuario, "Registro de item de movimiento",
                     String.format("{\"productoId\":%d,\"cantidad\":%d}", producto.getId(), item.getCantidad()));
-
             productosAfectados.add(producto.getId());
         }
 
-        // Auditoría general movimiento
-        auditar("Movimiento", saved.getId(), usuario, "Registro de movimiento", "{}");
-
-        // Recalcular stock total por producto
         productosAfectados.forEach(this::recomputeProductoStock);
-
-        return saved;
     }
 
     private void ajustarStock(Bodega bodega, Producto producto, Integer cantidad, boolean sumar, String usuario) {
@@ -172,16 +224,13 @@ public class MovimientoServiceImpl implements MovimientoService {
         stock.setFechaActualizacion(LocalDateTime.now());
         stockRepository.save(stock);
 
-        // Auditoría stock
         auditar("Stock", stock.getId(), usuario, "Actualización de stock",
                 String.format("{\"antes\":%d,\"despues\":%d}", antes, despues));
     }
 
     private void recomputeProductoStock(Long productoId) {
         List<Stock> byProducto = stockRepository.findByProductoId(productoId);
-        int total = byProducto.stream()
-                .mapToInt(s -> Optional.ofNullable(s.getCantidad()).orElse(0))
-                .sum();
+        int total = byProducto.stream().mapToInt(s -> Optional.ofNullable(s.getCantidad()).orElse(0)).sum();
 
         Producto p = productoRepository.findById(productoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado id=" + productoId));
@@ -192,15 +241,5 @@ public class MovimientoServiceImpl implements MovimientoService {
 
     private void auditar(String entidad, Long entidadId, String usuario, String accion, String detalle) {
         auditoriaService.crearAuditoria(entidad, entidadId, usuario, accion, detalle, usuario);
-    }
-
-    @Override
-    public List<Movimiento> buscarPorTipo(String tipo) {
-        try {
-            TipoMovimiento tipoEnum = TipoMovimiento.valueOf(tipo.toUpperCase());
-            return movimientoRepository.findByTipo(tipoEnum);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Tipo de movimiento no válido: " + tipo);
-        }
     }
 }

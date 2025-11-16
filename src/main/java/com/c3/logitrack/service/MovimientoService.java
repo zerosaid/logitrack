@@ -16,4 +16,8 @@ public interface MovimientoService {
     Movimiento registrarMovimiento(Movimiento movimiento);
 
     List<Movimiento> buscarPorTipo(String upperCase);
+
+    boolean eliminarMovimiento(Long id);
+
+    Movimiento actualizarMovimiento(Long id, Movimiento movimiento);
 }
