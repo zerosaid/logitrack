@@ -28,19 +28,29 @@
                 </select>
 
                 <label for="producto">Producto</label>
-                <input type="text" id="producto" required placeholder="Ej: Aceite vegetal" />
+                <select id="producto" required>
+                    <!-- Opciones dinámicas desde backend -->
+                </select>
 
                 <label for="cantidad">Cantidad</label>
                 <input type="number" id="cantidad" min="1" required placeholder="Ej: 50" />
 
                 <label for="origen">Bodega Origen</label>
-                <input type="text" id="origen" placeholder="Ej: Bodega Norte" />
+                <select id="origen">
+                    <option value="">Seleccione...</option>
+                    <!-- Opciones dinámicas desde backend -->
+                </select>
 
                 <label for="destino">Bodega Destino</label>
-                <input type="text" id="destino" placeholder="Ej: Bodega Central" />
+                <select id="destino">
+                    <option value="">Seleccione...</option>
+                    <!-- Opciones dinámicas desde backend -->
+                </select>
 
                 <label for="usuario">Usuario Responsable</label>
-                <input type="text" id="usuario" required placeholder="Ej: Juan Martínez" />
+                <select id="usuario" required>
+                    <!-- Opciones dinámicas desde backend -->
+                </select>
 
                 <button type="submit">💾 Registrar Movimiento</button>
             </form>

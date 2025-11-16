@@ -2,87 +2,111 @@ const form = document.getElementById("movForm");
 const tableBody = document.querySelector("#movTable tbody");
 const backBtn = document.getElementById("backBtn");
 
-let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
-let editIndex = null;
+let editId = null;
 
-// ====== Renderizar tabla ======
-function renderTable() {
-    tableBody.innerHTML = "";
-    movimientos.forEach((mov, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${mov.tipo}</td>
-      <td>${mov.producto}</td>
-      <td>${mov.cantidad}</td>
-      <td>${mov.origen || "-"}</td>
-      <td>${mov.destino || "-"}</td>
-      <td>${mov.usuario}</td>
-      <td>${mov.fecha}</td>
-      <td>
-        <button class="btn-edit" data-index="${index}">✏️</button>
-        <button class="btn-delete" data-index="${index}">🗑️</button>
-      </td>
-    `;
-        tableBody.appendChild(row);
-    });
-    localStorage.setItem("movimientos", JSON.stringify(movimientos));
+// ====== RENDERIZAR TABLA ======
+async function renderTable() {
+    try {
+        const res = await fetch("http://localhost:8080/api/movimientos");
+        const movimientos = await res.json();
+
+        tableBody.innerHTML = "";
+        movimientos.forEach((mov, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${mov.tipo}</td>
+                <td>${mov.items.map(i => i.producto?.nombre).join(", ")}</td>
+                <td>${mov.items.reduce((acc, i) => acc + (i.cantidad || 0), 0)}</td>
+                <td>${mov.bodegaOrigen?.nombre || "-"}</td>
+                <td>${mov.bodegaDestino?.nombre || "-"}</td>
+                <td>${mov.usuario?.nombre || "-"}</td>
+                <td>${mov.fecha ? new Date(mov.fecha).toLocaleString("es-CO") : "-"}</td>
+                <td>
+                    <button class="btn-edit" data-id="${mov.id}">✏️</button>
+                    <button class="btn-delete" data-id="${mov.id}">🗑️</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (err) {
+        console.error("Error al cargar movimientos:", err);
+    }
 }
 
-// ====== Guardar movimiento ======
-form.addEventListener("submit", (e) => {
+// ====== GUARDAR O EDITAR ======
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const nuevoMovimiento = {
+    const movimientoData = {
         tipo: document.getElementById("tipo").value,
-        producto: document.getElementById("producto").value.trim(),
-        cantidad: document.getElementById("cantidad").value,
-        origen: document.getElementById("origen").value.trim(),
-        destino: document.getElementById("destino").value.trim(),
-        usuario: document.getElementById("usuario").value.trim(),
-        fecha: new Date().toLocaleString("es-CO"),
+        usuario: { id: parseInt(document.getElementById("usuario").value) || 0 },
+        bodegaOrigen: document.getElementById("origen").value
+            ? { id: parseInt(document.getElementById("origen").value) }
+            : null,
+        bodegaDestino: document.getElementById("destino").value
+            ? { id: parseInt(document.getElementById("destino").value) }
+            : null,
+        items: [
+            {
+                producto: { id: parseInt(document.getElementById("producto").value) || 0 },
+                cantidad: parseInt(document.getElementById("cantidad").value) || 0,
+            },
+        ],
     };
 
-    if (editIndex !== null) {
-        movimientos[editIndex] = nuevoMovimiento;
-        editIndex = null;
-    } else {
-        movimientos.push(nuevoMovimiento);
+    try {
+        if (editId) {
+            await fetch(`http://localhost:8080/api/movimientos/${editId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(movimientoData),
+            });
+            editId = null;
+        } else {
+            await fetch("http://localhost:8080/api/movimientos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(movimientoData),
+            });
+        }
+        form.reset();
+        renderTable();
+    } catch (err) {
+        console.error("Error al guardar movimiento:", err);
     }
-
-    form.reset();
-    renderTable();
 });
 
-// ====== Editar movimiento ======
-tableBody.addEventListener("click", (e) => {
+// ====== EDITAR / ELIMINAR ======
+tableBody.addEventListener("click", async (e) => {
+    const id = e.target.getAttribute("data-id");
+
     if (e.target.classList.contains("btn-edit")) {
-        const index = e.target.getAttribute("data-index");
-        const mov = movimientos[index];
+        const res = await fetch(`http://localhost:8080/api/movimientos/${id}`);
+        const mov = await res.json();
 
-        document.getElementById("tipo").value = mov.tipo;
-        document.getElementById("producto").value = mov.producto;
-        document.getElementById("cantidad").value = mov.cantidad;
-        document.getElementById("origen").value = mov.origen;
-        document.getElementById("destino").value = mov.destino;
-        document.getElementById("usuario").value = mov.usuario;
+        document.getElementById("tipo").value = mov.tipo || "";
+        document.getElementById("producto").value = mov.items[0]?.producto?.id || "";
+        document.getElementById("cantidad").value = mov.items[0]?.cantidad || "";
+        document.getElementById("origen").value = mov.bodegaOrigen?.id || "";
+        document.getElementById("destino").value = mov.bodegaDestino?.id || "";
+        document.getElementById("usuario").value = mov.usuario?.id || "";
 
-        editIndex = index;
+        editId = id;
     }
 
     if (e.target.classList.contains("btn-delete")) {
-        const index = e.target.getAttribute("data-index");
         if (confirm("¿Eliminar este movimiento?")) {
-            movimientos.splice(index, 1);
+            await fetch(`http://localhost:8080/api/movimientos/${id}`, { method: "DELETE" });
             renderTable();
         }
     }
 });
 
-// ====== Botón de regreso ======
+// ====== BOTÓN REGRESO ======
 backBtn.addEventListener("click", () => {
     window.location.href = "../../admin-dashboard.html";
 });
 
-// ====== Inicializar ======
+// ====== INICIALIZAR ======
 renderTable();
