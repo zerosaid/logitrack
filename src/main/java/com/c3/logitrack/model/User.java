@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import com.c3.logitrack.model.enums.Role;
         @UniqueConstraint(columnNames = {"username"}),
         @UniqueConstraint(columnNames = {"email"})
     })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
     @Id
@@ -40,15 +42,14 @@ public class User {
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
-    // Relación con movimientos
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference("user-movimiento") // referencia hacia Movimiento
+    @JsonManagedReference("user-movimiento")
     private List<Movimiento> movimientos;
 
-    // ===== Constructores =====
+    // Constructores
     public User() {}
 
-    // ===== Getters y Setters =====
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -76,7 +77,6 @@ public class User {
     public List<Movimiento> getMovimientos() { return movimientos; }
     public void setMovimientos(List<Movimiento> movimientos) { this.movimientos = movimientos; }
 
-    // Descripción legible del rol
     public String getRoleDescripcion() {
         return role != null ? role.getDescripcion() : "Sin rol definido";
     }

@@ -1,5 +1,7 @@
 package com.c3.logitrack.model.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum Role {
     ADMIN("Administrador"),
     EMPLEADO("Empleado");
@@ -12,5 +14,13 @@ public enum Role {
 
     public String getDescripcion() {
         return descripcion;
+    }
+
+    @JsonCreator
+    public static Role fromString(String value) {
+        if (value == null) {
+            return null;
+        }
+        return Role.valueOf(value.toUpperCase());
     }
 }
