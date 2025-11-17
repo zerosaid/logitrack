@@ -1,178 +1,205 @@
-# LogiTrack S.A. - Sistema de Gestión y Auditoría de Bodegas
 
-## Descripción del Proyecto
+# 🚛📦 LOGITRACK S.A.
+**Sistema de Gestión y Auditoría de Inventarios en Bodegas**
 
-LogiTrack S.A. administra varias bodegas distribuidas en distintas ciudades, encargadas de almacenar productos y gestionar movimientos de inventario (entradas, salidas y transferencias).
-Actualmente, el control se realiza manualmente en hojas de cálculo, sin trazabilidad ni control de accesos.
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2+-6DB33F?style=for-the-badge&logo=springboot)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql)
+![JWT](https://img.shields.io/badge/JWT-Security-000000?style=for-the-badge&logo=jsonwebtokens)
+![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203-85EA2D?style=for-the-badge&logo=swagger)
+![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk)
 
-Este proyecto consiste en un **backend centralizado desarrollado en Spring Boot** que permite:
+Repositorio oficial: https://github.com/zerosaid/logitrack
 
-* Controlar todos los movimientos de inventario entre bodegas.
-* Registrar automáticamente los cambios mediante auditorías.
-* Proteger la información con autenticación JWT.
-* Ofrecer endpoints REST documentados y seguros.
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                          DESCRIPCIÓN GENERAL
+</p>
 
-El sistema está diseñado para ser escalable, seguro y auditable, facilitando la gestión de inventarios y la toma de decisiones.
+LogiTrack S.A. es un **backend profesional** para administrar bodegas distribuidas, controlar inventarios, registrar movimientos y auditar todas las operaciones realizadas por los usuarios.
 
----
+Problemas que resuelve:
+ - ❌ Falta de trazabilidad
+ - ❌ Manejo manual en hojas de cálculo
+ - ❌ Cero auditoría
+ - ❌ Sin control de accesos
 
-## Objetivo General
+Soluciones clave:
+ - ✔ Backend robusto con Spring Boot
+ - ✔ Auditoría automática integrada
+ - ✔ Seguridad con JWT + Roles
+ - ✔ CRUD completos (bodegas, productos, usuarios)
+ - ✔ Reportes avanzados
+ - ✔ Documentación con Swagger
+ - ✔ Arquitectura escalable y limpia
 
-Desarrollar un sistema de gestión y auditoría de bodegas que permita registrar transacciones de inventario y generar reportes auditables de los cambios realizados por cada usuario.
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         OBJETIVO GENERAL
+</p>
+Construir un backend **seguro, trazable y escalable** que permita gestionar inventarios y movimientos entre bodegas, con auditoría detallada de cada acción realizada por los usuarios.
 
----
-
-## Requisitos Funcionales
-
-### 1. Gestión de Bodegas
-
-* CRUD completo: registrar, consultar, actualizar y eliminar bodegas.
-* Campos: `id`, `nombre`, `ubicacion`, `capacidad`, `encargado`.
-
-### 2. Gestión de Productos
-
-* CRUD completo de productos.
-* Campos: `id`, `nombre`, `categoria`, `stock`, `precio`.
-
-### 3. Movimientos de Inventario
-
-* Registrar entradas, salidas y transferencias entre bodegas.
-* Cada movimiento almacena:
-
-  * Fecha
-  * Tipo de movimiento (`ENTRADA`, `SALIDA`, `TRANSFERENCIA`)
-  * Usuario responsable
-  * Bodega origen/destino
-  * Productos y cantidades
-
-### 4. Auditoría de Cambios
-
-* Registrar todas las operaciones (`INSERT`, `UPDATE`, `DELETE`)
-* Guardar información: fecha/hora, usuario, entidad afectada, valores anteriores/nuevos
-* Auditoría automática mediante JPA EntityListeners o aspectos con anotaciones personalizadas.
-
-### 5. Autenticación y Seguridad
-
-* Spring Security + JWT
-* Endpoints `/auth/login` y `/auth/register`
-* Rutas seguras: `/bodegas`, `/productos`, `/movimientos`
-* Roles de usuario: `ADMIN` / `EMPLEADO`
-
-### 6. Consultas Avanzadas y Reportes
-
-* Filtros:
-
-  * Productos con stock bajo (< 10 unidades)
-  * Movimientos por rango de fechas
-  * Auditorías por usuario o tipo de operación
-* Reporte REST: stock total por bodega y productos más movidos
-
-### 7. Documentación
-
-* Documentación de API con Swagger/OpenAPI 3
-* Pruebas de endpoints protegidos con JWT
-
-### 8. Excepciones y Validaciones
-
-* Manejo global de errores con `@ControllerAdvice`
-* Validaciones con `@NotNull`, `@Size`, `@Min`, etc.
-* Respuestas JSON personalizadas para errores: 400, 401, 404, 500
-
-### 9. Despliegue
-
-* Base de datos MySQL configurada en `application.properties`
-* Scripts SQL: `schema.sql`, `data.sql`
-* Ejecución con Tomcat embebido o externo
-* Frontend básico en HTML/CSS/JS para login y consultas principales
-
----
-
-## Estructura del Proyecto
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         ESTRUCTURA & ARQUITECTURA
+</p>
 
 ```
-src/
- ├─ controller/
- ├─ service/
- ├─ repository/
- ├─ model/
- ├─ config/
- ├─ security/
- └─ exception/
-frontend/
- ├─ index.html
- ├─ login.html
- ├─ css/
- └─ js/
++-----------------------------+
+|         FRONTEND            |
+|     HTML / CSS / JS         |
++-------------+---------------+
+              |
+              | HTTP / JSON
+              |
++-------------v---------------+
+|       SPRING BOOT           |
+|    Controladores REST       |
++-------------+---------------+
+              |
++-------------v---------------+
+|       SERVICE LAYER         |
+| Lógica + Auditoría + JWT    |
++-------------+---------------+
+              |
++-------------v---------------+
+|       JPA REPOSITORY        |
+| CRUD + Auditoría JPA         |
++-------------+---------------+
+              |
++-------------v---------------+
+|           MYSQL             |
+| Bodegas / Productos / Logs  |
++-----------------------------+
 ```
 
----
-
-## Instalación y Ejecución
-
-1. Clonar el repositorio:
-
-```bash
-git clone https://github.com/usuario/logitrack-backend.git
-```
-
-2. Configurar MySQL y crear base de datos:
-
-```sql
-CREATE DATABASE logitrack;
-```
-
-3. Ejecutar scripts SQL:
-
-```bash
-mysql -u root -p logitrack < schema.sql
-mysql -u root -p logitrack < data.sql
-```
-
-4. Configurar `application.properties` con usuario, contraseña y URL de la base de datos.
-
-5. Ejecutar la aplicación con Maven:
-
-```bash
-mvn spring-boot:run
-```
-
-6. Acceder a Swagger para probar los endpoints:
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         ESTRUCTURA DEL PROYECTO
+</p>
 
 ```
-http://localhost:8080/swagger-ui.html
+📁 src/
+├─ controller/ # Controladores REST
+├─ service/ # Lógica de negocio
+├─ repository/ # Acceso a datos con JPA
+├─ model/ # Entidades y modelos
+├─ config/ # Configuraciones generales
+├─ security/ # JWT, roles y seguridad
+└─ exception/ # Manejo de errores centralizado
+
+📁 frontend/
+├─ index.html        # Dashboard principal
+├─ login.html        # Página de login
+├─ css/              # Estilos
+└─ js/               # Scripts
 ```
 
----
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         DIAGRAMA UML SIMPLIFICADO (ASCII)
+</p>
 
-## Ejemplos de Endpoints
+```
++----------------+        +----------------+
+|    Bodega      | 1..*   |   Producto     |
++----------------+        +----------------+
+| id             |        | id             |
+| nombre         |        | nombre         |
+| ubicacion      |        | categoria      |
+| capacidad      |        | precio         |
+| encargado      |        | stock          |
++----------------+        +----------------+
 
-* **Login:** `POST /auth/login`
-* **Registrar usuario:** `POST /auth/register`
-* **CRUD Bodegas:** `GET/POST/PUT/DELETE /bodegas`
-* **CRUD Productos:** `GET/POST/PUT/DELETE /productos`
-* **Registrar Movimiento:** `POST /movimientos`
-* **Auditoría:** `GET /auditorias`
+            1           1..*
+Bodega --------------- Movimiento --------------- ProductoMovimiento
+                               |
+                               | 1
+                     +-----------------------+
+                     |      Movimiento       |
+                     +-----------------------+
+                     | id                    |
+                     | tipo                  |
+                     | fecha                 |
+                     | usuario               |
+                     | bodegaOrigen          |
+                     | bodegaDestino         |
+                     +-----------------------+
 
----
++----------------+
+|   Auditoria    |
++----------------+
+| id             |
+| entidad        |
+| usuario        |
+| fecha          |
+| accion         |
+| valoresPrev    |
+| valoresNuevo   |
++----------------+
+```
 
-## Entregables
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         INSTALACIÓN
+</p>
 
-* Código fuente completo del backend en Spring Boot
-* Scripts SQL (`schema.sql`, `data.sql`)
-* Documentación Swagger
-* Carpeta `frontend/` con HTML/CSS/JS para pruebas
-* README.md (este documento)
-* Documento explicativo con diagrama de clases, arquitectura, ejemplo de token JWT y uso
-* Repositorio en GitHub
+1) Clonar el repositorio:  
+   `git clone https://github.com/zerosaid/logitrack`
 
----
+2) Crear base de datos:  
+   `CREATE DATABASE logitrack;`
 
-## Capturas y Pruebas
+3) Ejecutar scripts SQL:  
+   `mysql -u root -p logitrack < schema.sql`  
+   `mysql -u root -p logitrack < data.sql`
 
-*(Se pueden incluir imágenes de Swagger y de la interfaz frontend aquí)*
+4) Configurar MySQL:  
+   Editar `application.properties` con usuario y contraseña
 
----
+5) Ejecutar aplicación:  
+   `mvn spring-boot:run`
 
-## Licencia
+6) Acceder a Swagger:  
+   `http://localhost:8080/swagger-ui.html`
 
-Este proyecto es propiedad de LogiTrack S.A. y no debe ser distribuido sin autorización.
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         ENDPOINTS PRINCIPALES
+</p>
+
+**Autenticación:**  
+ - POST /auth/login  
+ - POST /auth/register  
+
+**Bodegas:**  
+ - GET /bodegas  
+ - POST /bodegas  
+ - PUT /bodegas/{id}  
+ - DELETE /bodegas/{id}  
+
+**Productos:**  
+ - GET /productos  
+ - POST /productos  
+ - PUT /productos/{id}  
+ - DELETE /productos/{id}  
+
+**Movimientos:**  
+ - POST /movimientos  
+
+**Auditoría:**  
+ - GET /auditorias
+
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         ENTREGABLES
+</p>
+
+ - Backend completo (Spring Boot)  
+ - Scripts SQL  
+ - Frontend básico (HTML/CSS/JS)  
+ - Swagger  
+ - Diagramas ASCII y UML  
+ - README unificado y llamativo
+
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         LICENCIA
+</p>
+
+Este proyecto es propiedad privada de LogiTrack S.A.  
+Prohibida su distribución sin autorización escrita.
+
+<p align="center" style="background-color:#222; color:#fff; padding:8px 4px; border-radius:4px; font-weight:bold; letter-spacing:2px;">
+                         FIN DEL README
+</p>
