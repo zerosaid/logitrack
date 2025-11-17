@@ -2,12 +2,30 @@
 const backBtn = document.getElementById("backBtn");
 const tablaBody = document.querySelector("#tablaReportes tbody");
 const reporteForm = document.getElementById("form-reporte");
+const messageDiv = document.getElementById("message");
 
 // Verificar elementos DOM
-if (!backBtn || !tablaBody || !reporteForm) {
-    console.error("Uno o más elementos DOM (backBtn, tablaReportes, form-reporte) no encontrados.");
-    return;
-}
+document.addEventListener("DOMContentLoaded", () => {
+    if (!backBtn || !tablaBody || !reporteForm || !messageDiv) {
+        console.error("Uno o más elementos DOM no encontrados:", {
+            backBtn: !!backBtn,
+            tablaBody: !!tablaBody,
+            reporteForm: !!reporteForm,
+            messageDiv: !!messageDiv
+        });
+        return;
+    }
+
+    // Establecer fecha y hora actuales como valores predeterminados
+    const now = new Date();
+    const defaultDateTime = now.toISOString().slice(0, 16); // Formato "2025-11-16T18:26"
+    document.getElementById("fecha-inicio").value = defaultDateTime;
+    document.getElementById("fecha-fin").value = defaultDateTime;
+
+    // Registrar eventos
+    backBtn.addEventListener("click", handleBackClick);
+    reporteForm.addEventListener("submit", generarReporte);
+});
 
 // Renderizar tabla de reportes
 function cargarReportes(reportes = []) {
@@ -29,7 +47,7 @@ function cargarReportes(reportes = []) {
     });
 }
 
-// Descargar reporte (simulación con fetch realista)
+// Descargar reporte
 async function descargarReporte(id, tipo) {
     const token = sessionStorage.getItem("token");
     if (!token) {
@@ -91,14 +109,14 @@ async function generarReporte(event) {
     }
 }
 
-// Volver al dashboard
-backBtn.addEventListener("click", () => {
-    window.location.href = "../../admin-dashboard.html";
-});
+// Manejar clic en el botón "Volver"
+function handleBackClick() {
+    console.log("Intentando redirigir a /fronted/admin-dashboard.html");
+    window.location.href = "/fronted/admin/admin-dashboard.html"; // Ruta absoluta
+}
 
-// Mostrar mensajes (reutilizable desde movimientos.js)
+// Mostrar mensajes
 function showMessage(message, isError = false) {
-    const messageDiv = document.getElementById("message");
     if (!messageDiv) {
         console.error("Elemento 'message' no encontrado en el DOM.");
         return;
@@ -108,10 +126,3 @@ function showMessage(message, isError = false) {
     messageDiv.style.display = "block";
     setTimeout(() => (messageDiv.style.display = "none"), 3000);
 }
-
-// Cargar reportes al iniciar (puedes quitar esto si prefieres solo generarlos)
-document.addEventListener("DOMContentLoaded", () => {
-    reporteForm.addEventListener("submit", generarReporte);
-    // Opcional: Cargar reportes iniciales (descomentar y ajustar endpoint si lo tienes)
-    // generarReporte({ preventDefault: () => {} }); // Simulación inicial
-});
