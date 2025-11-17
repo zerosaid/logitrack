@@ -34,9 +34,9 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
         sessionStorage.setItem("userRole", data.role);
         const basePath = '/fronted/'; // Ruta absoluta desde la raíz del servidor
         if (data.role === "ADMIN") {
-            window.location.href = basePath + "admin/admin-dashboard.html";
+            window.location.href = basePath + "Admin/admin-dashboard.html";
         } else {
-            window.location.href = basePath + "empleado/user-dashboard.html";
+            window.location.href = basePath + "Empleado/user-dashboard.html";
         }
     })
     .catch(error => {

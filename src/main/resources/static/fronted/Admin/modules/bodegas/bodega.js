@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Botón para volver
     if (backBtn) {
         backBtn.addEventListener("click", () => {
-            window.location.href = '/fronted/admin/admin-dashboard.html';
+            window.location.href = '/fronted/Admin/admin-dashboard.html';
         });
     }
 

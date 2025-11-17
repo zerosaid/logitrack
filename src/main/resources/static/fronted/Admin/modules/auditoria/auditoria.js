@@ -1,9 +1,35 @@
-// === BOTÓN DE REGRESO ===
-document.getElementById("backBtn").addEventListener("click", () => {
-    window.location.href = "../../admin-dashboard.html";
-});
+// === FUNCIÓN SEGURA DE FETCH (UNIFICADA) ===
+async function apiFetch(url, options = {}) {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+        showMessage('Sesión expirada. Redirigiendo al login...', true);
+        setTimeout(() => window.location.href = '/fronted/index.html', 2000);
+        return Promise.reject(new Error('No autenticado'));
+    }
 
-// === FUNCIONES DE UTILIDAD ===
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+
+    return fetch(`http://localhost:8080${url}`, { ...options, headers })
+        .then(async r => {
+            if (r.status === 401) {
+                sessionStorage.clear();
+                showMessage('Sesión expirada.', true);
+                setTimeout(() => window.location.href = '/fronted/index.html', 2000);
+                throw new Error('No autorizado');
+            }
+            if (!r.ok) {
+                const text = await r.text();
+                throw new Error(text || `Error ${r.status}`);
+            }
+            return r.json();
+        });
+}
+
+// === UTILIDADES UI ===
 const tableBody = document.querySelector("#auditTable tbody");
 const messageDiv = document.getElementById("message");
 
@@ -11,32 +37,13 @@ function showMessage(message, isError = false) {
     messageDiv.textContent = message;
     messageDiv.className = `message ${isError ? "error" : "success"}`;
     messageDiv.style.display = "block";
-    setTimeout(() => (messageDiv.style.display = "none"), 3000);
+    setTimeout(() => messageDiv.style.display = "none", 3000);
 }
 
-async function fetchAuditorias(url = "/api/auditorias") {
-    try {
-        const token = sessionStorage.getItem("token");
-        if (!token) {
-            showMessage("No estás autenticado. Redirigiendo al login.", true);
-            setTimeout(() => (window.location.href = "/fronted/index.html"), 2000);
-            return [];
-        }
-
-        const response = await fetch(`http://localhost:8080${url}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return await response.json();
-    } catch (err) {
-        showMessage(`Error al cargar auditorías: ${err.message}`, true);
-        return [];
-    }
-}
-
-function cargarAuditorias(auditorias) {
+// === RENDERIZAR TABLA ===
+function renderAuditorias(auditorias) {
     tableBody.innerHTML = "";
-    if (auditorias.length === 0) {
+    if (!auditorias || auditorias.length === 0) {
         tableBody.innerHTML = "<tr><td colspan='6'>No hay auditorías disponibles.</td></tr>";
         return;
     }
@@ -46,53 +53,71 @@ function cargarAuditorias(auditorias) {
         const tipoClass = 
             a.operacion === "INSERT" ? "tag-insert" :
             a.operacion === "UPDATE" ? "tag-update" :
-            "tag-delete";
+            a.operacion === "DELETE" ? "tag-delete" :
+            "tag-default";
 
         row.innerHTML = `
             <td>${a.id || '-'}</td>
             <td>${a.usuario || '-'}</td>
             <td>${a.entidad || '-'}</td>
             <td class="${tipoClass}">${a.operacion || '-'}</td>
-            <td>${a.fechaHora ? new Date(a.fechaHora).toLocaleString() : '-'}</td>
-            <td>${a.valoresDespues || a.valoresAntes || '-'}</td>
+            <td>${a.fechaHora ? new Date(a.fechaHora).toLocaleString('es-CO') : '-'}</td>
+            <td class="truncate">${a.valoresDespues || a.valoresAntes || '-'}</td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-// === CARGAR AUDITORÍAS AL INICIAR ===
-document.addEventListener("DOMContentLoaded", async () => {
-    const auditorias = await fetchAuditorias();
-    cargarAuditorias(auditorias);
-});
+// === CARGAR AUDITORÍAS (CON FILTROS) ===
+async function cargarAuditorias(filtros = {}) {
+    try {
+        const params = new URLSearchParams();
+        
+        if (filtros.usuario) params.append('usuario', filtros.usuario);
+        if (filtros.operacion) params.append('operacion', filtros.operacion);
+        if (filtros.desde) params.append('desde', filtros.desde);
+        if (filtros.hasta) params.append('hasta', filtros.hasta);
 
-// === FILTROS ===
-document.getElementById("filterBtn").addEventListener("click", async () => {
-    const usuario = document.getElementById("searchUser").value.toLowerCase();
-    const tipo = document.getElementById("filterType").value;
-    const from = document.getElementById("fromDate").value;
-    const to = document.getElementById("toDate").value;
+        const url = `/api/auditorias${params.toString() ? '?' + params : ''}`;
+        const data = await apiFetch(url);
 
-    let url = "/api/auditorias";
-    const params = [];
-    if (usuario) params.push(`usuario=${encodeURIComponent(usuario)}`);
-    if (tipo) params.push(`operacion=${encodeURIComponent(tipo)}`);
-    if (from) params.push(`desde=${encodeURIComponent(from + "T00:00:00")}`);
-    if (to) params.push(`hasta=${encodeURIComponent(to + "T23:59:59")}`);
-
-    if (params.length > 0) {
-        url += "?" + params.join("&");
+        renderAuditorias(data);
+        if (data.length === 0) {
+            showMessage('No se encontraron auditorías con los filtros aplicados.');
+        }
+    } catch (err) {
+        showMessage(`Error: ${err.message}`, true);
+        renderAuditorias([]);
     }
+}
 
-    const auditorias = await fetchAuditorias(url);
-    cargarAuditorias(auditorias);
-});
+// === EVENTOS ===
+document.addEventListener("DOMContentLoaded", () => {
+    // Cargar todas al inicio
+    cargarAuditorias();
 
-document.getElementById("clearBtn").addEventListener("click", async () => {
-    document.getElementById("searchUser").value = "";
-    document.getElementById("filterType").value = "";
-    document.getElementById("fromDate").value = "";
-    document.getElementById("toDate").value = "";
-    const auditorias = await fetchAuditorias();
-    cargarAuditorias(auditorias);
+    // Botón de regreso
+    document.getElementById("backBtn")?.addEventListener("click", () => {
+        window.location.href = "../../admin-dashboard.html";
+    });
+
+    // Filtro
+    document.getElementById("filterBtn")?.addEventListener("click", () => {
+        const filtros = {
+            usuario: document.getElementById("searchUser").value.trim().toLowerCase(),
+            operacion: document.getElementById("filterType").value,
+            desde: document.getElementById("fromDate").value ? `${document.getElementById("fromDate").value}T00:00:00` : '',
+            hasta: document.getElementById("toDate").value ? `${document.getElementById("toDate").value}T23:59:59` : ''
+        };
+        cargarAuditorias(filtros);
+    });
+
+    // Limpiar filtros
+    document.getElementById("clearBtn")?.addEventListener("click", () => {
+        document.getElementById("searchUser").value = "";
+        document.getElementById("filterType").value = "";
+        document.getElementById("fromDate").value = "";
+        document.getElementById("toDate").value = "";
+        cargarAuditorias();
+    });
 });

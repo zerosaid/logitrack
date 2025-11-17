@@ -112,7 +112,7 @@ async function generarReporte(event) {
 // Manejar clic en el botón "Volver"
 function handleBackClick() {
     console.log("Intentando redirigir a /fronted/admin-dashboard.html");
-    window.location.href = "/fronted/admin/admin-dashboard.html"; // Ruta absoluta
+    window.location.href = "/fronted/Admin/admin-dashboard.html"; // Ruta absoluta
 }
 
 // Mostrar mensajes
