@@ -28,7 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/movimientos")
 @CrossOrigin(origins = { "http://localhost:8080", "http://localhost:3000" }, allowCredentials = "true")
-@Tag(name = "Movimientos", description = "Gestión de entradas, salidas y transferencias. Solo ADMIN.")
+@Tag(name = "Movimiento", description = "Gestión de entradas, salidas y transferencias. Solo ADMIN.")
 @SecurityRequirement(name = "bearerAuth")
 public class MovimientoController {
 
