@@ -1,5 +1,6 @@
 package com.c3.logitrack.service.impl;
 
+import com.c3.logitrack.dto.ProductoCreateDTO;
 import com.c3.logitrack.model.Producto;
 import com.c3.logitrack.repository.ProductoRepository;
 import com.c3.logitrack.service.ProductoService;
@@ -18,101 +19,76 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public List<Producto> listarTodos() {
-        try {
-            List<Producto> productos = productoRepository.findAll();
-            System.out.println("Total de productos recuperados: " + productos.size());
-
-            // Evitar serialización cíclica
-            productos.forEach(p -> {
-                p.setStocks(null);
-                p.setMovimientoItems(null);
-            });
-
-            return productos;
-
-        } catch (Exception e) {
-            System.err.println("Error al listar productos: " + e.getMessage());
-            throw new RuntimeException("Error al cargar la lista de productos", e);
+    public Producto crearProducto(ProductoCreateDTO productoDTO) {
+        if (productoDTO.getCodigo() == null || productoDTO.getCodigo().isBlank()) {
+            throw new IllegalArgumentException("El código del producto es obligatorio.");
         }
+        if (productoDTO.getNombre() == null || productoDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio.");
+        }
+        if (productoDTO.getCategoria() == null || productoDTO.getCategoria().isBlank()) {
+            throw new IllegalArgumentException("La categoría del producto es obligatoria.");
+        }
+        if (productoDTO.getPrecio() == null || productoDTO.getPrecio() < 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor o igual a 0.");
+        }
+        if (productoDTO.getStockMin() == null || productoDTO.getStockMin() < 0) {
+            throw new IllegalArgumentException("El stock mínimo debe ser mayor o igual a 0.");
+        }
+
+        Producto producto = new Producto();
+        producto.setCodigo(productoDTO.getCodigo());
+        producto.setNombre(productoDTO.getNombre());
+        producto.setCategoria(productoDTO.getCategoria());
+        producto.setPrecio(productoDTO.getPrecio());
+        producto.setStockMin(productoDTO.getStockMin());
+        return productoRepository.save(producto);
     }
 
     @Override
-    public Optional<Producto> buscarPorId(Long id) {
-        try {
-            Optional<Producto> producto = productoRepository.findById(id);
-            System.out.println("Buscando producto con ID " + id);
-
-            producto.ifPresent(p -> {
-                p.setStocks(null);
-                p.setMovimientoItems(null);
-            });
-
-            return producto;
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar producto", e);
-        }
+    public List<Producto> listarProductos() {
+        return productoRepository.findAll();
     }
 
     @Override
-    public Producto guardar(Producto producto) {
-        try {
-            if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
-                throw new IllegalArgumentException("El nombre del producto es obligatorio");
-            }
-            if (producto.getPrecio() == null) {
-                throw new IllegalArgumentException("El precio del producto es obligatorio");
-            }
-
-            Producto savedProducto = productoRepository.save(producto);
-            System.out.println("Producto guardado con ID: " + savedProducto.getId());
-            return savedProducto;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar el producto", e);
-        }
+    public Optional<Producto> obtenerProductoPorId(Long id) {
+        return productoRepository.findById(id);
     }
 
     @Override
-    public Producto actualizar(Long id, Producto producto) {
-        try {
-            return productoRepository.findById(id).map(p -> {
-
-                if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
-                    throw new IllegalArgumentException("El nombre del producto es obligatorio");
-                }
-                if (producto.getPrecio() == null) {
-                    throw new IllegalArgumentException("El precio del producto es obligatorio");
-                }
-
-                p.setNombre(producto.getNombre());
-                p.setCategoria(producto.getCategoria());
-                p.setPrecio(producto.getPrecio());
-                p.setStocks(producto.getStocks());
-
-                Producto updated = productoRepository.save(p);
-                System.out.println("Producto actualizado con ID: " + id);
-                return updated;
-
-            }).orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al actualizar el producto", e);
+    public Optional<Producto> actualizarProducto(Long id, ProductoCreateDTO productoDTO) {
+        if (productoDTO.getCodigo() == null || productoDTO.getCodigo().isBlank()) {
+            throw new IllegalArgumentException("El código del producto es obligatorio.");
         }
+        if (productoDTO.getNombre() == null || productoDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio.");
+        }
+        if (productoDTO.getCategoria() == null || productoDTO.getCategoria().isBlank()) {
+            throw new IllegalArgumentException("La categoría del producto es obligatoria.");
+        }
+        if (productoDTO.getPrecio() == null || productoDTO.getPrecio() < 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor o igual a 0.");
+        }
+        if (productoDTO.getStockMin() == null || productoDTO.getStockMin() < 0) {
+            throw new IllegalArgumentException("El stock mínimo debe ser mayor o igual a 0.");
+        }
+
+        return productoRepository.findById(id).map(existente -> {
+            existente.setCodigo(productoDTO.getCodigo());
+            existente.setNombre(productoDTO.getNombre());
+            existente.setCategoria(productoDTO.getCategoria());
+            existente.setPrecio(productoDTO.getPrecio());
+            existente.setStockMin(productoDTO.getStockMin());
+            return productoRepository.save(existente);
+        });
     }
 
     @Override
-    public void eliminar(Long id) {
-        try {
-            if (!productoRepository.existsById(id)) {
-                throw new RuntimeException("Producto no encontrado con ID: " + id);
-            }
-
+    public boolean eliminarProducto(Long id) {
+        if (productoRepository.existsById(id)) {
             productoRepository.deleteById(id);
-            System.out.println("Producto eliminado con ID: " + id);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar el producto", e);
+            return true;
         }
+        return false;
     }
 }

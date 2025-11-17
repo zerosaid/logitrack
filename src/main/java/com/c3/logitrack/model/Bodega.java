@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -7,15 +8,22 @@ import java.util.List;
 
 @Entity
 @Table(name = "bodega")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Bodega {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
+
+    @Column(nullable = false)
     private String ubicacion;
-    private Double capacidad;
+
+    @Column(nullable = false)
+    private Integer capacidad;
+
     private String encargado;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
@@ -33,7 +41,10 @@ public class Bodega {
     @JsonManagedReference("bodega-movimiento-destino")
     private List<Movimiento> movimientosDestino;
 
-    // ===== Getters y Setters =====
+    // Constructores
+    public Bodega() {}
+
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -43,8 +54,8 @@ public class Bodega {
     public String getUbicacion() { return ubicacion; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
 
-    public Double getCapacidad() { return capacidad; }
-    public void setCapacidad(Double capacidad) { this.capacidad = capacidad; }
+    public Integer getCapacidad() { return capacidad; }
+    public void setCapacidad(Integer capacidad) { this.capacidad = capacidad; }
 
     public String getEncargado() { return encargado; }
     public void setEncargado(String encargado) { this.encargado = encargado; }

@@ -9,15 +9,12 @@
 </head>
 
 <body>
-    <!-- HEADER -->
     <header class="header">
         <h1>🔍 Registro de Auditorías</h1>
         <button id="backBtn" class="back-btn">⬅ Volver al Dashboard</button>
     </header>
 
-    <!-- CONTENEDOR PRINCIPAL -->
     <div class="container">
-        <!-- FILTROS DE BÚSQUEDA -->
         <div class="filters">
             <input type="text" id="searchUser" placeholder="Buscar por usuario..." />
             <select id="filterType">
@@ -32,7 +29,8 @@
             <button id="clearBtn" class="action-btn">Limpiar</button>
         </div>
 
-        <!-- TABLA DE AUDITORÍAS -->
+        <div id="message"></div>
+
         <div class="table-container">
             <table id="auditTable">
                 <thead>
@@ -45,9 +43,7 @@
                         <th>Detalles</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Aquí se inyectan las auditorías desde JS -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
     </div>

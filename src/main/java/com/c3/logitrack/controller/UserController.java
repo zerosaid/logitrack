@@ -1,9 +1,11 @@
 package com.c3.logitrack.controller;
 
 import com.c3.logitrack.dto.LoginRequest;
+import com.c3.logitrack.dto.UserCreateDTO;
 import com.c3.logitrack.model.User;
 import com.c3.logitrack.security.JwtTokenProvider;
 import com.c3.logitrack.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;
@@ -27,13 +29,13 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
 
     public UserController(UserService userService, AuthenticationManager authenticationManager,
-            JwtTokenProvider jwtTokenProvider) {
+                          JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    // === LISTAR TODOS LOS USUARIOS (solo activos por defecto) ===
+    // === LISTAR TODOS LOS USUARIOS ACTIVOS ===
     @GetMapping
     public ResponseEntity<List<User>> listarTodos() {
         List<User> usuarios = userService.listarTodosActivos();
@@ -41,7 +43,6 @@ public class UserController {
             u.setPassword(null);
             u.setMovimientos(null); // Evitar ciclos infinitos
         });
-        System.out.println("Usuarios activos encontrados: " + usuarios.size()); // Depuración
         return ResponseEntity.ok(usuarios);
     }
 
@@ -81,7 +82,7 @@ public class UserController {
                     respuesta.put("username", u.getUsername());
                     respuesta.put("role", u.getRole().name());
                     respuesta.put("descripcionRol", u.getRoleDescripcion());
-                    respuesta.put("activo", u.isActivo()); // Añadir estado
+                    respuesta.put("activo", u.isActivo());
                     return ResponseEntity.ok(respuesta);
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -116,19 +117,22 @@ public class UserController {
 
     // === CREAR NUEVO USUARIO (solo ADMIN) ===
     @PostMapping("/crear/{creadorUsername}")
-    public ResponseEntity<?> crearUsuario(@PathVariable String creadorUsername, @RequestBody User nuevoUsuario) {
-        System.out.println("Intentando crear usuario con creador: " + creadorUsername);
-        System.out.println("Datos recibidos: " + nuevoUsuario);
+    public ResponseEntity<?> crearUsuario(@PathVariable String creadorUsername, @RequestBody UserCreateDTO userDTO) {
         try {
-            User creado = userService.crearUsuario(nuevoUsuario, creadorUsername);
+            if (userDTO == null) {
+                return ResponseEntity.badRequest().body("El cuerpo de la solicitud no puede ser nulo");
+            }
+            User creado = userService.crearUsuario(userDTO, creadorUsername);
             creado.setPassword(null);
-            return ResponseEntity.ok(creado);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error al crear el usuario: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear el usuario: " + e.getMessage());
         }
     }
 
@@ -143,7 +147,8 @@ public class UserController {
             actualizado.setPassword(null);
             return ResponseEntity.ok(actualizado);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error al actualizar el usuario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el usuario: " + e.getMessage());
         }
     }
 
@@ -154,22 +159,33 @@ public class UserController {
             userService.desactivarUsuario(id, editorUsername);
             return ResponseEntity.noContent().build();
         } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error al desactivar el usuario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al desactivar el usuario: " + e.getMessage());
         }
     }
 
-    // === ELIMINAR USUARIO (nuevo endpoint) ===
+    // === ELIMINAR USUARIO ===
     @DeleteMapping("/eliminar/{id}/{editorUsername}")
     public ResponseEntity<?> eliminarUsuario(@PathVariable Long id, @PathVariable String editorUsername) {
         try {
             userService.eliminarUsuario(id, editorUsername);
             return ResponseEntity.noContent().build();
         } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error al eliminar el usuario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar el usuario: " + e.getMessage());
         }
+    }
+
+    // === ENDPOINT PARA DASHBOARD: CONTEO DE USUARIOS ACTIVOS ===
+    @GetMapping("/conteo-activos")
+    public ResponseEntity<Map<String, Object>> conteoUsuariosActivos() {
+        long totalActivos = userService.listarTodosActivos().size();
+        Map<String, Object> response = new HashMap<>();
+        response.put("usuariosActivos", totalActivos);
+        return ResponseEntity.ok(response);
     }
 }

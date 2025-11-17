@@ -1,6 +1,7 @@
 package com.c3.logitrack.repository;
 
 import com.c3.logitrack.model.Auditoria;
+import com.c3.logitrack.model.enums.TipoOperacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,9 +13,11 @@ public interface AuditoriaRepository extends JpaRepository<Auditoria, Long> {
 
     List<Auditoria> findByUsuario(String usuario);
 
-    List<Auditoria> findByOperacion(String operacion);
+    List<Auditoria> findByEntidad(String entidad);
 
     List<Auditoria> findByFechaHoraBetween(LocalDateTime fechaDesde, LocalDateTime fechaHasta);
 
-    List<Auditoria> findByEntidad(String entidad);
+    List<Auditoria> findByOperacion(TipoOperacion operacion);
+
+    List<Auditoria> findByFechaHoraAfter(LocalDateTime limite);
 }

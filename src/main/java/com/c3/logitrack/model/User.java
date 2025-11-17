@@ -1,5 +1,6 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import com.c3.logitrack.model.enums.Role;
         @UniqueConstraint(columnNames = {"username"}),
         @UniqueConstraint(columnNames = {"email"})
     })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
     @Id
@@ -44,10 +46,10 @@ public class User {
     @JsonManagedReference("user-movimiento")
     private List<Movimiento> movimientos;
 
-    // ===== Constructores =====
+    // Constructores
     public User() {}
 
-    // ===== Getters y Setters =====
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

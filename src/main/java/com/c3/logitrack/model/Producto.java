@@ -1,105 +1,71 @@
 package com.c3.logitrack.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "producto")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre", length = 150, nullable = false)
+    @Column(nullable = false, unique = true)
+    private String codigo;
+
+    @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "categoria", length = 100)
+    @Column(nullable = false)
     private String categoria;
 
-    @Column(name = "precio", nullable = false, precision = 12, scale = 2)
-    private BigDecimal precio;
+    @Column(nullable = false)
+    private Double precio;
 
-    @Column(name = "fecha_registro", nullable = false)
-    private LocalDateTime fechaRegistro;
+    @Column(name = "stock_min", nullable = false)
+    private Integer stockMin;
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
+    private LocalDateTime fechaRegistro = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("producto-stock")
     private List<Stock> stocks;
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("producto-movimiento-item")
     private List<MovimientoItem> movimientoItems;
 
-    // Constructores
-    public Producto() {}
-
-    public Producto(String nombre, String categoria, BigDecimal precio) {
-        this.nombre = nombre;
-        this.categoria = categoria;
-        this.precio = precio;
-        this.fechaRegistro = LocalDateTime.now();
-    }
-
     // Getters y Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
 
-    public String getCategoria() {
-        return categoria;
-    }
+    public Double getPrecio() { return precio; }
+    public void setPrecio(Double precio) { this.precio = precio; }
 
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
+    public Integer getStockMin() { return stockMin; }
+    public void setStockMin(Integer stockMin) { this.stockMin = stockMin; }
 
-    public BigDecimal getPrecio() {
-        return precio;
-    }
+    public LocalDateTime getFechaRegistro() { return fechaRegistro; }
+    public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }
 
-    public void setPrecio(BigDecimal precio) {
-        this.precio = precio;
-    }
+    public List<Stock> getStocks() { return stocks; }
+    public void setStocks(List<Stock> stocks) { this.stocks = stocks; }
 
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
-
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
-    }
-
-    public List<Stock> getStocks() {
-        return stocks;
-    }
-
-    public void setStocks(List<Stock> stocks) {
-        this.stocks = stocks;
-    }
-
-    public List<MovimientoItem> getMovimientoItems() {
-        return movimientoItems;
-    }
-
-    public void setMovimientoItems(List<MovimientoItem> movimientoItems) {
-        this.movimientoItems = movimientoItems;
-    }
-
-    public void setStock(int total) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setStock'");
-    }
+    public List<MovimientoItem> getMovimientoItems() { return movimientoItems; }
+    public void setMovimientoItems(List<MovimientoItem> movimientoItems) { this.movimientoItems = movimientoItems; }
 }

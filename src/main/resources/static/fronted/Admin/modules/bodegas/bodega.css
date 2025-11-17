@@ -8,7 +8,8 @@
 
 /* ====== Fondo general ====== */
 body {
-    background-color: #1e1e2f; /* Gris oscuro con tinte azulado */
+    background-color: #1e1e2f;
+    /* Gris oscuro con tinte azulado */
     color: #f5f5f5;
     min-height: 100vh;
 }
@@ -18,7 +19,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(90deg, #3a0ca3, #7209b7); /* Gradiente morado elegante */
+    background: linear-gradient(90deg, #3a0ca3, #7209b7);
+    /* Gradiente morado elegante */
     color: white;
     padding: 15px 30px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
@@ -57,11 +59,13 @@ body {
 
 /* ====== Sección del formulario ====== */
 .form-section {
-    background-color: #2b2b3c; /* Gris oscuro intermedio */
+    background-color: #2b2b3c;
+    /* Gris oscuro intermedio */
     padding: 25px;
     border-radius: 16px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-    border-left: 5px solid #9d4edd; /* Borde morado */
+    border-left: 5px solid #9d4edd;
+    /* Borde morado */
 }
 
 .form-section h2 {
@@ -160,22 +164,25 @@ tbody tr:hover {
     transition: 0.3s ease;
 }
 
-    .message {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-        display: none;
-    }
-    .message.success {
-        background-color: #d4edda;
-        color: #155724;
-        display: block;
-    }
-    .message.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        display: block;
-    }
+.message {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
 
 /* ====== Responsividad ====== */
 /* Tablets y pantallas medianas */
@@ -251,11 +258,13 @@ tbody tr:hover {
     table {
         font-size: 0.85rem;
         display: block;
-        overflow-x: auto; /* Desplazamiento horizontal en móviles */
+        overflow-x: auto;
+        /* Desplazamiento horizontal en móviles */
         white-space: nowrap;
     }
 
-    th, td {
+    th,
+    td {
         padding: 8px;
     }
 }
@@ -283,7 +292,8 @@ tbody tr:hover {
         padding: 8px;
     }
 
-    th, td {
+    th,
+    td {
         font-size: 0.8rem;
         padding: 6px;
     }

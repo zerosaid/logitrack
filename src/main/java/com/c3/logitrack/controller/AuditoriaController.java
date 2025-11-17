@@ -2,11 +2,14 @@ package com.c3.logitrack.controller;
 
 import com.c3.logitrack.model.Auditoria;
 import com.c3.logitrack.service.AuditoriaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/auditorias")
@@ -15,6 +18,7 @@ public class AuditoriaController {
 
     private final AuditoriaService auditoriaService;
 
+    @Autowired
     public AuditoriaController(AuditoriaService auditoriaService) {
         this.auditoriaService = auditoriaService;
     }
@@ -59,8 +63,16 @@ public class AuditoriaController {
         if (auditoriaService.obtenerPorId(id).isPresent()) {
             auditoriaService.eliminarAuditoria(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/pendientes")
+    public ResponseEntity<Map<String, Object>> auditoriasPendientes() {
+        List<Auditoria> pendientes = auditoriaService.listarPendientes();
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalPendientes", pendientes.size());
+        response.put("auditorias", pendientes);
+        return ResponseEntity.ok(response);
     }
 }

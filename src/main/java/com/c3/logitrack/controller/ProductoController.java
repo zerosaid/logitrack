@@ -1,96 +1,144 @@
 package com.c3.logitrack.controller;
 
+import com.c3.logitrack.dto.ProductoCreateDTO;
 import com.c3.logitrack.model.Producto;
+import com.c3.logitrack.model.User;
 import com.c3.logitrack.service.ProductoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.c3.logitrack.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;import java.util.List;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/productos")
-@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, allowCredentials = "true")
 public class ProductoController {
 
     private final ProductoService productoService;
-    private final ObjectMapper objectMapper;
+    private final UserService userService;
 
-    @Autowired
-    public ProductoController(ProductoService productoService, ObjectMapper objectMapper) {
+    public ProductoController(ProductoService productoService, UserService userService) {
         this.productoService = productoService;
-        this.objectMapper = objectMapper;
+        this.userService = userService;
     }
 
+    // Listar todos los productos
     @GetMapping
     public ResponseEntity<List<Producto>> listarTodos() {
+        List<Producto> productos = productoService.listarProductos();
+        productos.forEach(this::limpiarProducto);
+        return ResponseEntity.ok(productos);
+    }
+
+    // Obtener producto por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Producto> obtenerPorId(@PathVariable Long id) {
+        return productoService.obtenerProductoPorId(id)
+                .map(p -> {
+                    limpiarProducto(p);
+                    return ResponseEntity.ok(p);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Crear nuevo producto (solo ADMIN)
+    @PostMapping
+    public ResponseEntity<?> crearProducto(@RequestBody ProductoCreateDTO productoDTO, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            List<Producto> productos = productoService.listarTodos();
-            if (productos.isEmpty()) {
-                return ResponseEntity.noContent().build();
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
             }
-            // Limpiar relaciones para evitar serialización circular
-            productos.forEach(p -> {
-                p.setStocks(null);
-                p.setMovimientoItems(null);
-            });
-            return ResponseEntity.ok(productos);
+            User user = userService.buscarPorUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            if (!"ADMIN".equals(user.getRole().name())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo administradores pueden crear productos");
+            }
+            if (productoDTO == null) {
+                return ResponseEntity.badRequest().body("El cuerpo de la solicitud no puede ser nulo");
+            }
+            Producto nuevo = productoService.crearProducto(productoDTO);
+            limpiarProducto(nuevo);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear el producto: " + e.getMessage());
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Producto> buscarPorId(@PathVariable Long id) {
+    // Actualizar producto existente (solo ADMIN)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarProducto(@PathVariable Long id, @RequestBody ProductoCreateDTO productoDTO, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            return productoService.buscarPorId(id)
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+            }
+            User user = userService.buscarPorUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            if (!"ADMIN".equals(user.getRole().name())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo administradores pueden actualizar productos");
+            }
+            return productoService.actualizarProducto(id, productoDTO)
                     .map(p -> {
-                        p.setStocks(null);
-                        p.setMovimientoItems(null);
+                        limpiarProducto(p);
                         return ResponseEntity.ok(p);
                     })
                     .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el producto: " + e.getMessage());
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Producto> crear(@RequestBody Producto producto) {
-        try {
-            if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(null);
-            }
-            Producto creado = productoService.guardar(producto);
-            creado.setStocks(null); // Evitar serialización circular
-            creado.setMovimientoItems(null);
-            return ResponseEntity.ok(creado);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
-        }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Producto> actualizar(@PathVariable Long id, @RequestBody Producto producto) {
-        try {
-            if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(null);
-            }
-            Producto actualizado = productoService.actualizar(id, producto);
-            actualizado.setStocks(null);
-            actualizado.setMovimientoItems(null);
-            return ResponseEntity.ok(actualizado);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
-        }
-    }
-
+    // Eliminar producto (solo ADMIN)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarProducto(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            productoService.eliminar(id);
-            return ResponseEntity.noContent().build();
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+            }
+            User user = userService.buscarPorUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            if (!"ADMIN".equals(user.getRole().name())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo administradores pueden eliminar productos");
+            }
+            boolean eliminado = productoService.eliminarProducto(id);
+            if (eliminado) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar el producto: " + e.getMessage());
         }
+    }
+
+    // Endpoint para dashboard: total de productos
+    @GetMapping("/dashboard/total")
+    public ResponseEntity<Map<String, Object>> totalProductos() {
+        List<Producto> productos = productoService.listarProductos();
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalProductos", productos.size());
+        return ResponseEntity.ok(response);
+    }
+
+    // Método auxiliar para limpiar relaciones cíclicas
+    private void limpiarProducto(Producto p) {
+        p.setStocks(null);
+        p.setMovimientoItems(null);
     }
 }

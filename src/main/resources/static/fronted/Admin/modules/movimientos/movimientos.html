@@ -1,76 +1,84 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LogiTrack | Movimientos de Inventario</title>
-    <link rel="stylesheet" href="./movimientos.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos</title>
+    <link rel="stylesheet" href="./movimientos.css">
 </head>
 
 <body>
-    <nav class="navbar">
-        <h1>📦 Movimientos de Inventario</h1>
-        <button id="backBtn">⬅ Volver al Dashboard</button>
-    </nav>
+
+    <div class="navbar">
+        <h1>Registro de Movimientos</h1>
+    </div>
 
     <div class="container">
-        <!-- FORMULARIO -->
-        <section class="form-section">
+
+        <!-- Sección del formulario -->
+        <div class="form-section">
             <h2>Registrar Movimiento</h2>
-            <form id="movForm">
-                <label for="tipo">Tipo de Movimiento</label>
-                <select id="tipo" required>
-                    <option value="">Seleccione...</option>
+
+            <form id="form-movimiento">
+                
+                <label for="tipo">Tipo de movimiento</label>
+                <select id="tipo" name="tipo">
+                    <option value="">Seleccione tipo</option>
                     <option value="ENTRADA">Entrada</option>
                     <option value="SALIDA">Salida</option>
                     <option value="TRANSFERENCIA">Transferencia</option>
                 </select>
 
+                <label for="bodegaOrigen">Bodega Origen</label>
+                <select id="bodegaOrigen" name="bodegaOrigen">
+                    <option value="">Seleccione bodega origen</option>
+                </select>
+
+                <label for="bodegaDestino">Bodega Destino</label>
+                <select id="bodegaDestino" name="bodegaDestino">
+                    <option value="">Seleccione bodega destino</option>
+                </select>
+
+                <label for="usuario">Usuario</label>
+                <select id="usuario" name="usuario">
+                    <option value="">Seleccione usuario</option>
+                </select>
+
                 <label for="producto">Producto</label>
-                <input type="text" id="producto" required placeholder="Ej: Aceite vegetal" />
+                <select id="producto" name="producto">
+                    <option value="">Seleccione producto</option>
+                </select>
 
                 <label for="cantidad">Cantidad</label>
-                <input type="number" id="cantidad" min="1" required placeholder="Ej: 50" />
+                <input type="number" id="cantidad" name="cantidad" min="1" placeholder="Cantidad">
 
-                <label for="origen">Bodega Origen</label>
-                <input type="text" id="origen" placeholder="Ej: Bodega Norte" />
-
-                <label for="destino">Bodega Destino</label>
-                <input type="text" id="destino" placeholder="Ej: Bodega Central" />
-
-                <label for="usuario">Usuario Responsable</label>
-                <input type="text" id="usuario" required placeholder="Ej: Juan Martínez" />
-
-                <button type="submit">💾 Registrar Movimiento</button>
+                <button type="submit">Guardar</button>
             </form>
-        </section>
 
-        <!-- TABLA -->
-        <section class="tabla-section">
-            <h2>Historial de Movimientos</h2>
-            <table id="movTable">
+            <div id="message" class="message"></div>
+        </div>
+
+        <!-- Sección de tabla -->
+        <div class="tabla-section">
+            <h2>Movimientos Registrados</h2>
+
+            <table>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Tipo</th>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Origen</th>
-                        <th>Destino</th>
+                        <th>Bodega Origen</th>
+                        <th>Bodega Destino</th>
                         <th>Usuario</th>
                         <th>Fecha</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Filas dinámicas -->
-                </tbody>
+                <tbody id="movimientos-tbody"></tbody>
             </table>
-        </section>
+        </div>
+
     </div>
 
     <script src="./movimientos.js"></script>
 </body>
-
 </html>
