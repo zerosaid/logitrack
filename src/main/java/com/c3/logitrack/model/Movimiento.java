@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "movimientos") // ¡¡CORREGIDO!! Alineado con el nombre real de la tabla
+@Table(name = "movimiento") // ¡¡CORREGIDO!! Alineado con el nombre real de la tabla
 public class Movimiento {
 
     @Id

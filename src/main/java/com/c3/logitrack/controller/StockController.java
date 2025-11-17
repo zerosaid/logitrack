@@ -2,11 +2,17 @@ package com.c3.logitrack.controller;
 
 import com.c3.logitrack.model.Stock;
 import com.c3.logitrack.service.StockService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Stock", description = "Gestión de existencias por bodega y producto")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/stocks")
 @CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")

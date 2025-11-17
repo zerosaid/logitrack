@@ -5,6 +5,12 @@ import com.c3.logitrack.model.Bodega;
 import com.c3.logitrack.model.User;
 import com.c3.logitrack.service.BodegaService;
 import com.c3.logitrack.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +24,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/bodegas")
 @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, allowCredentials = "true")
+@Tag(name = "Bodegas", description = "Gestión de bodegas. Solo ADMIN puede crear, actualizar o eliminar.")
+@SecurityRequirement(name = "bearerAuth")
 public class BodegaController {
 
     private final BodegaService bodegaService;
@@ -28,17 +36,25 @@ public class BodegaController {
         this.userService = userService;
     }
 
-    // Listar todas las bodegas
     @GetMapping
+    @Operation(summary = "Listar todas las bodegas", description = "Accesible por ADMIN y EMPLEADO")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de bodegas"),
+        @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     public ResponseEntity<List<Bodega>> listarTodas() {
         List<Bodega> bodegas = bodegaService.listarBodegas();
         bodegas.forEach(this::limpiarBodega);
         return ResponseEntity.ok(bodegas);
     }
 
-    // Obtener bodega por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Bodega> obtenerPorId(@PathVariable Long id) {
+    @Operation(summary = "Obtener bodega por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Bodega encontrada"),
+        @ApiResponse(responseCode = "404", description = "Bodega no encontrada")
+    })
+    public ResponseEntity<Bodega> obtenerPorId(@Parameter(description = "ID de la bodega") @PathVariable Long id) {
         return bodegaService.obtenerBodegaPorId(id)
                 .map(b -> {
                     limpiarBodega(b);
@@ -47,8 +63,14 @@ public class BodegaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Crear nueva bodega (solo ADMIN)
     @PostMapping
+    @Operation(summary = "Crear nueva bodega", description = "Solo usuarios con rol ADMIN")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Bodega creada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos o nulos"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado: solo ADMIN"),
+        @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     public ResponseEntity<?> crearBodega(@RequestBody BodegaCreateDTO bodegaDTO, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             if (userDetails == null) {
@@ -74,8 +96,14 @@ public class BodegaController {
         }
     }
 
-    // Actualizar bodega existente (solo ADMIN)
     @PutMapping("/{id}")
+    @Operation(summary = "Actualizar bodega existente", description = "Solo ADMIN")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Bodega actualizada"),
+        @ApiResponse(responseCode = "404", description = "Bodega no encontrada"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
     public ResponseEntity<?> actualizarBodega(@PathVariable Long id, @RequestBody BodegaCreateDTO bodegaDTO, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             if (userDetails == null) {
@@ -101,8 +129,14 @@ public class BodegaController {
         }
     }
 
-    // Eliminar bodega (solo ADMIN)
     @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar bodega", description = "Solo ADMIN")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Bodega eliminada"),
+        @ApiResponse(responseCode = "404", description = "Bodega no encontrada"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado"),
+        @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     public ResponseEntity<?> eliminarBodega(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             if (userDetails == null) {
@@ -127,8 +161,9 @@ public class BodegaController {
         }
     }
 
-    // Endpoint para dashboard: total de bodegas
     @GetMapping("/dashboard/total")
+    @Operation(summary = "Total de bodegas", description = "Para dashboard")
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Conteo total de bodegas"))
     public ResponseEntity<Map<String, Object>> totalBodegas() {
         List<Bodega> bodegas = bodegaService.listarBodegas();
         Map<String, Object> response = new HashMap<>();
@@ -136,7 +171,7 @@ public class BodegaController {
         return ResponseEntity.ok(response);
     }
 
-    // Método auxiliar para limpiar relaciones ciclicas
+    // Método auxiliar para evitar ciclos en JSON
     private void limpiarBodega(Bodega b) {
         b.setStocks(null);
         b.setMovimientosOrigen(null);

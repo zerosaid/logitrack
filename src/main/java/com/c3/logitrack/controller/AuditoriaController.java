@@ -2,6 +2,10 @@ package com.c3.logitrack.controller;
 
 import com.c3.logitrack.model.Auditoria;
 import com.c3.logitrack.service.AuditoriaService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+@Tag(name = "Auditoría", description = "Consulta de logs de cambios. Solo lectura.")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/auditorias")
 @CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
