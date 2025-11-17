@@ -5,6 +5,10 @@ import com.c3.logitrack.model.Producto;
 import com.c3.logitrack.model.User;
 import com.c3.logitrack.service.ProductoService;
 import com.c3.logitrack.service.UserService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Productos", description = "CRUD de productos. Solo ADMIN.")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/productos")
 @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, allowCredentials = "true")
