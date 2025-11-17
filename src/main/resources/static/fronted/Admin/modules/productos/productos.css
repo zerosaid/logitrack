@@ -25,20 +25,20 @@ body {
     letter-spacing: 1px;
 }
 
-.back-btn {
-    background-color: #3a3a3a;
-    color: #e5e5e5;
+.navbar button {
+    background-color: #b5179e;
+    color: #fff;
     border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: bold;
     cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-.back-btn:hover {
-    background-color: #7a42c2;
-    color: #fff;
+.navbar button:hover {
+    background-color: #7209b7;
+    transform: translateY(-2px);
 }
 
 /* === Contenedor principal === */
