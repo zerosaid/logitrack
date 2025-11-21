@@ -68,4 +68,9 @@ public interface MovimientoService {
      * @throws IllegalArgumentException Si la cantidad es menor o igual a 0.
      */
     List<Movimiento> listarUltimos(int cantidad);
+
+    static List<Movimiento> listarRecientes(int i) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'listarRecientes'");
+    }
 }

@@ -25,4 +25,9 @@ public interface ReporteService {
      * @return Lista de mapas con los detalles de las auditorías.
      */
     List<Map<String, Object>> getAuditoria();
+
+    static Object getMovimientoRecientes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getMovimientoRecientes'");
+    }
 }
