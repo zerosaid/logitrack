@@ -6,7 +6,6 @@ import com.c3.logitrack.service.AuditoriaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,6 @@ public class AuditoriaController {
 
     private final AuditoriaService auditoriaService;
 
-    @Autowired
     public AuditoriaController(AuditoriaService auditoriaService) {
         this.auditoriaService = auditoriaService;
     }

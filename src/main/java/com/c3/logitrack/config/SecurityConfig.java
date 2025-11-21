@@ -45,15 +45,39 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Permitir OPTIONS para CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/usuarios/login", "/api/usuarios/register").permitAll()
-                        .requestMatchers("/fronted/**", "/favicon.ico").permitAll()
+                        
+                        // Permitir acceso a AMBOS endpoints de autenticación
+                        .requestMatchers("/api/auth/login", "/api/usuarios/login", 
+                                       "/api/auth/register", "/api/usuarios/register").permitAll()
+                        
+                        // Permitir acceso a recursos estáticos (HTML, CSS, JS, imágenes)
+                        .requestMatchers("/", "/index.html", "/login.html", "/dashboard.html", 
+                                       "/register.html", "/*.html").permitAll()
+                        .requestMatchers("/Admin/**", "/Empleado/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", 
+                                       "/fonts/**", "/assets/**", "/icon/**").permitAll()
+                        .requestMatchers("/favicon.ico", "/robots.txt").permitAll()
+                        
+                        // Swagger (documentación API)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        
+                        // Endpoints públicos de solo lectura
                         .requestMatchers(HttpMethod.GET, "/api/bodegas/**", "/api/productos/**", "/api/usuarios/**").permitAll()
+                        
+                        // Movimientos requieren autenticación
                         .requestMatchers("/api/movimientos/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/bodegas/**", "/api/productos/**", "/api/movimientos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/bodegas/**", "/api/productos/**", "/api/movimientos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/bodegas/**", "/api/productos/**", "/api/movimientos/**").hasRole("ADMIN")
+                        
+                        // Solo ADMIN puede crear, actualizar y eliminar
+                        .requestMatchers(HttpMethod.POST, "/api/bodegas/**", "/api/productos/**", 
+                                       "/api/movimientos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/bodegas/**", "/api/productos/**", 
+                                       "/api/movimientos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/bodegas/**", "/api/productos/**", 
+                                       "/api/movimientos/**").hasRole("ADMIN")
+                        
+                        // El resto requiere autenticación
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -64,10 +88,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -110,6 +110,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(usuario);
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void eliminarUsuario(Long id, String editorUsername) throws SecurityException, Exception {
         User usuario = obtenerPorId(id)

@@ -4,7 +4,6 @@ import com.c3.logitrack.model.Auditoria;
 import com.c3.logitrack.model.enums.TipoOperacion;
 import com.c3.logitrack.repository.AuditoriaRepository;
 import com.c3.logitrack.service.AuditoriaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ public class AuditoriaServiceImpl implements AuditoriaService {
 
     private final AuditoriaRepository auditoriaRepository;
 
-    @Autowired
     public AuditoriaServiceImpl(AuditoriaRepository auditoriaRepository) {
         this.auditoriaRepository = auditoriaRepository;
     }

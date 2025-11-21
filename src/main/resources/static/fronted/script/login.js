@@ -11,8 +11,8 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
         return;
     }
 
-    // Petición al backend corregida al endpoint /api/usuarios/login
-    fetch('/api/usuarios/login', {
+    // CORREGIDO: Usar /api/auth/login
+    fetch('/api/auth/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -22,21 +22,25 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
     .then(response => {
         console.log('Respuesta del servidor (login):', response);
         if (!response.ok) {
-            return response.text().then(text => { throw new Error(text || 'Credenciales incorrectas'); });
+            return response.text().then(text => { 
+                throw new Error(text || 'Credenciales incorrectas'); 
+            });
         }
         return response.json();
     })
     .then(data => {
         console.log('Datos recibidos (login):', data);
-        // Guardar datos en sessionStorage con claves consistentes
-        sessionStorage.setItem("token", data.token);
-        sessionStorage.setItem("username", data.username); // Corregido a "username"
-        sessionStorage.setItem("userRole", data.role);
-        const basePath = '/fronted/'; // Ruta absoluta desde la raíz del servidor
+        
+        // Guardar datos en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("userRole", data.role);
+        
+        // CORREGIDO: Rutas sin /fronted/
         if (data.role === "ADMIN") {
-            window.location.href = basePath + "Admin/admin-dashboard.html";
+            window.location.href = "/Admin/admin-dashboard.html";
         } else {
-            window.location.href = basePath + "Empleado/user-dashboard.html";
+            window.location.href = "/Empleado/user-dashboard.html";
         }
     })
     .catch(error => {
@@ -54,7 +58,8 @@ if (togglePassword && passwordInput && eyeIcon) {
     togglePassword.addEventListener("click", () => {
         const isPassword = passwordInput.type === "password";
         passwordInput.type = isPassword ? "text" : "password";
-        eyeIcon.src = isPassword ? "./icon/ojo-a.png" : "./icon/ojo-c.png";
+        // CORREGIDO: Rutas absolutas
+        eyeIcon.src = isPassword ? "/icon/ojo-a.png" : "/icon/ojo-c.png";
         eyeIcon.alt = isPassword ? "Ocultar contraseña" : "Mostrar contraseña";
     });
 }
