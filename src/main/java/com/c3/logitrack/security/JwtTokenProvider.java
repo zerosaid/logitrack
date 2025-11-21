@@ -17,6 +17,8 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
+    private static final long EXPIRATION = 30000000;
+
     // Usar una clave segura generada por Keys.secretKeyFor
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
@@ -24,18 +26,15 @@ public class JwtTokenProvider {
     private int jwtExpirationMs;
 
     // === GENERAR TOKEN DESDE USER (para login) ===
-    public String generateToken(User user) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-
-        return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("role", user.getRole().name()) // Añadimos el rol
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(secretKey, SignatureAlgorithm.HS512)
-                .compact();
-    }
+public String generateToken(User user) {
+    return Jwts.builder()
+            .setSubject(user.getUsername())
+            .claim("roles", user.getAuthorities())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .compact();
+}
 
     // === GENERAR TOKEN DESDE AUTHENTICATION (para JwtAuthFilter) ===
     public String generateToken(Authentication authentication) {

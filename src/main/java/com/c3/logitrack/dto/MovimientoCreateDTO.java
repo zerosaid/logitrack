@@ -15,9 +15,8 @@ public class MovimientoCreateDTO {
     public static class MovimientoItemDTO {
         private Long productoId;
         private Integer cantidad;
-        private BigDecimal precioUnitario; // Añadido para cumplir con la base de datos
+        private BigDecimal precioUnitario;
 
-        // Getters y Setters
         public Long getProductoId() { return productoId; }
         public void setProductoId(Long productoId) { this.productoId = productoId; }
         public Integer getCantidad() { return cantidad; }

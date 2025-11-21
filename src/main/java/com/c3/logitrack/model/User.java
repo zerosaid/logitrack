@@ -80,4 +80,9 @@ public class User {
     public String getRoleDescripcion() {
         return role != null ? role.getDescripcion() : "Sin rol definido";
     }
+
+    public Object getAuthorities() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
+    }
 }
