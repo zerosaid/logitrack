@@ -30,8 +30,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
     public SecurityConfig(JwtAuthEntryPoint jwtAuthEntryPoint,
-                         JwtAuthFilter jwtAuthFilter,
-                         CustomUserDetailsService customUserDetailsService) {
+                          JwtAuthFilter jwtAuthFilter,
+                          CustomUserDetailsService customUserDetailsService) {
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
         this.jwtAuthFilter = jwtAuthFilter;
         this.customUserDetailsService = customUserDetailsService;
@@ -41,44 +41,49 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+
                         // Permitir OPTIONS para CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        
-                        // Permitir acceso a AMBOS endpoints de autenticación
-                        .requestMatchers("/api/auth/login", "/api/usuarios/login", 
-                                       "/api/auth/register", "/api/usuarios/register").permitAll()
-                        
-                        // Permitir acceso a recursos estáticos (HTML, CSS, JS, imágenes)
-                        .requestMatchers("/", "/index.html", "/login.html", "/dashboard.html", 
-                                       "/register.html", "/*.html").permitAll()
-                        .requestMatchers("/Admin/**", "/Empleado/**").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", 
-                                       "/fonts/**", "/assets/**", "/icon/**").permitAll()
+
+                        // Auth públicas
+                        .requestMatchers("/api/auth/login", "/api/usuarios/login",
+                                "/api/auth/register", "/api/usuarios/register").permitAll()
+
+                        // PERMITIR TODO EL FRONTEND (FIX IMPORTANTE)
+                        .requestMatchers("/fronted/**").permitAll()
+
+                        // Archivos estáticos comunes
+                        .requestMatchers("/", "/index.html", "/login.html", "/dashboard.html",
+                                "/register.html", "/*.html").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**",
+                                "/fonts/**", "/assets/**", "/icon/**").permitAll()
+
                         .requestMatchers("/favicon.ico", "/robots.txt").permitAll()
-                        
-                        // Swagger (documentación API)
+
+                        // Swagger
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        
-                        // Endpoints públicos de solo lectura
-                        .requestMatchers(HttpMethod.GET, "/api/bodegas/**", "/api/productos/**", "/api/usuarios/**").permitAll()
-                        
+
+                        // Endpoints públicos GET
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/bodegas/**", "/api/productos/**", "/api/usuarios/**").permitAll()
+
                         // Movimientos requieren autenticación
                         .requestMatchers("/api/movimientos/**").authenticated()
-                        
-                        // Solo ADMIN puede crear, actualizar y eliminar
-                        .requestMatchers(HttpMethod.POST, "/api/bodegas/**", "/api/productos/**", 
-                                       "/api/movimientos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/bodegas/**", "/api/productos/**", 
-                                       "/api/movimientos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/bodegas/**", "/api/productos/**", 
-                                       "/api/movimientos/**").hasRole("ADMIN")
-                        
-                        // El resto requiere autenticación
-                        .anyRequest().authenticated())
+
+                        // Solo ADMIN puede modificar
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/bodegas/**", "/api/productos/**", "/api/movimientos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/bodegas/**", "/api/productos/**", "/api/movimientos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/bodegas/**", "/api/productos/**", "/api/movimientos/**").hasRole("ADMIN")
+
+                        .anyRequest().authenticated()
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -87,15 +92,16 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:3000"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowCredentials(true);
+        config.setExposedHeaders(Arrays.asList("Authorization"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
+
         return source;
     }
 
@@ -106,10 +112,10 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
