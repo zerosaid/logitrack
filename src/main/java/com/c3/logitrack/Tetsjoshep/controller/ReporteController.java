@@ -1,4 +1,4 @@
-package com.c3.logitrack.Tets.controller;
+package com.c3.logitrack.Tetsjoshep.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

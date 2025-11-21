@@ -1,4 +1,4 @@
-package com.c3.logitrack.Tets.modeltest.enumtest;
+package com.c3.logitrack.Tetsjoshep.modeltest.enumtest;
 
 public enum TipoMovimientosTest {
     ENTRADA,

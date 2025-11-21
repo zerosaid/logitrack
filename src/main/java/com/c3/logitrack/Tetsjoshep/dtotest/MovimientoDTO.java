@@ -1,9 +1,9 @@
-package com.c3.logitrack.Tets.dtotest;
+package com.c3.logitrack.Tetsjoshep.dtotest;
 
 import java.util.List;
 
+import com.c3.logitrack.Tetsjoshep.modeltest.enumtest.TipoMovimientosTest;
 import com.c3.logitrack.dto.MovimientoCreateDTO.MovimientoItemDTO;
-import com.c3.logitrack.Tets.modeltest.enumtest.TipoMovimientosTest;
 
 public class MovimientoDTO {
     private TipoMovimientosTest tipoMovimiento;
